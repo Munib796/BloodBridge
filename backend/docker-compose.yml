@@ -1,0 +1,28 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgis/postgis:15-3.4
+    container_name: bloodbridge-db
+    restart: always
+    environment:
+      POSTGRES_DB: bloodbridge
+      POSTGRES_USER: bloodbridge_user
+      POSTGRES_PASSWORD: bloodbridge_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - bloodbridge_data:/var/lib/postgresql/data
+
+  adminer:
+    image: adminer
+    container_name: bloodbridge-adminer
+    restart: always
+    ports:
+      - "8080:8080"
+
+volumes:
+  bloodbridge_data:
+
+# <<<<<--------URl STRING-------->>>>>>>>
+# DATABASE_URL = "postgresql://bloodbridge_user:bloodbridge_pass@localhost:5432/bloodbridge"

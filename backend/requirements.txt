@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+pydantic-settings
+alembic
+pyjwt
+pwdlib[argon2]
+email-validator
+geoalchemy2
+cloudinary
+fastapi-mail
+slowapi
+python-multipart
+websockets
