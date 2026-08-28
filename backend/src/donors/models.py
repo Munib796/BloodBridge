@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, String
+from sqlalchemy import Boolean, Column, DateTime, Enum, Index, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -18,6 +18,9 @@ class Donor(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     phone = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
+    # Bumped on every password reset; access tokens issued before this are
+    # rejected, and it makes a reset link single-use.
+    password_changed_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
 
     blood_type = Column(Enum(BloodType, name="blood_type"), nullable=False)
     profile_pic_url = Column(String, nullable=True)
@@ -32,3 +35,8 @@ class Donor(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     matches = relationship("RequestMatch", back_populates="donor")
+
+    __table_args__ = (
+        # The nearby feed filters on blood type before the spatial predicate.
+        Index("ix_donors_blood_type", "blood_type"),
+    )

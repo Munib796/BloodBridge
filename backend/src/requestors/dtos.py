@@ -3,12 +3,14 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
+from src.utils.validators import Name, Password, Phone
+
 
 class RequestorSignup(BaseModel):
-    full_name: str
+    full_name: Name
     email: EmailStr
-    phone: str
-    password: str
+    phone: Phone
+    password: Password
 
 
 class RequestorLogin(BaseModel):
@@ -17,8 +19,8 @@ class RequestorLogin(BaseModel):
 
 
 class RequestorUpdateProfile(BaseModel):
-    full_name: str | None = None
-    phone: str | None = None
+    full_name: Name | None = None
+    phone: Phone | None = None
 
 
 class RequestorOut(BaseModel):
@@ -45,4 +47,4 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    new_password: str
+    new_password: Password

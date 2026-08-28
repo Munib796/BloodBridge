@@ -4,13 +4,14 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 from src.utils.enums import BloodType
+from src.utils.validators import Label, Latitude, Longitude, Name, Password, Phone
 
 
 class DonorSignup(BaseModel):
-    full_name: str
+    full_name: Name
     email: EmailStr
-    phone: str
-    password: str
+    phone: Phone
+    password: Password
     blood_type: BloodType
 
 
@@ -20,14 +21,14 @@ class DonorLogin(BaseModel):
 
 
 class DonorUpdateLocation(BaseModel):
-    latitude: float
-    longitude: float
-    area_label: str
+    latitude: Latitude
+    longitude: Longitude
+    area_label: Label
 
 
 class DonorUpdateProfile(BaseModel):
-    full_name: str | None = None
-    phone: str | None = None
+    full_name: Name | None = None
+    phone: Phone | None = None
     blood_type: BloodType | None = None
 
 
@@ -57,4 +58,4 @@ class ForgotPasswordRequest(BaseModel):
 
 class ResetPasswordRequest(BaseModel):
     token: str
-    new_password: str
+    new_password: Password

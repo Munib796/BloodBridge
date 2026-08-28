@@ -18,6 +18,7 @@ class Organization(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     phone = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
+    password_changed_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
 
     address = Column(String, nullable=False)
     location = Column(GeographyPoint(nullable=False), nullable=False)

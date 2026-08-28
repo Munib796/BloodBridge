@@ -1,31 +1,26 @@
-from fastapi import Depends, HTTPException, UploadFile, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi import HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
-from src.organizations.models import Organization
 from src.organizations import dtos
-from src.utils.cloudinary_utils import upload_file_to_cloudinary
-from src.utils.database import get_db
-from src.utils.enums import ApprovalStatus
+from src.organizations.models import Organization
+from src.utils import accounts
+from src.utils.auth import get_current_entity
+from src.utils.cloudinary_utils import upload_image
 from src.utils.geo import make_point
-from src.utils.helpers import create_access_token, decode_access_token, hash_password, verify_password
+from src.utils.helpers import create_access_token, hash_password, verify_password
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="organizations/login", auto_error=False)
+ROLE = "organization"
 
-
-def get_current_organization(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> Organization:
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
-    payload = decode_access_token(token, expected_role="organization")
-    org = db.query(Organization).filter(Organization.id == payload.get("id")).first()
-    if not org:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Organization not found")
-    return org
+get_current_organization = get_current_entity(ROLE)
 
 
 def signup(data: dtos.OrganizationSignup, db: Session) -> Organization:
     if db.query(Organization).filter(Organization.email == data.email).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+    if db.query(Organization).filter(Organization.name == data.name).first():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Organization name already registered"
+        )
 
     org = Organization(
         name=data.name,
@@ -44,18 +39,14 @@ def signup(data: dtos.OrganizationSignup, db: Session) -> Organization:
 def login(data: dtos.OrganizationLogin, db: Session) -> str:
     org = db.query(Organization).filter(Organization.email == data.email).first()
     if not org or not verify_password(data.password, org.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    if org.approval_status != ApprovalStatus.APPROVED:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=f"Account is {org.approval_status.value}, awaiting admin approval",
-        )
-    return create_access_token({"id": str(org.id), "role": "organization"})
+        raise accounts.invalid_credentials()
+    # Admin approval is the gate for this role; there is no email flow to check.
+    accounts.assert_can_login(org, require_verification=False)
+    return create_access_token({"id": str(org.id), "role": ROLE})
 
 
-async def upload_logo(org: Organization, file: UploadFile, db: Session) -> Organization:
-    url = await upload_file_to_cloudinary(file, folder="bloodbridge/organizations")
-    org.logo_url = url
+def upload_logo(org: Organization, file: UploadFile, db: Session) -> Organization:
+    org.logo_url = upload_image(file, folder="bloodbridge/organizations")
     db.commit()
     db.refresh(org)
     return org

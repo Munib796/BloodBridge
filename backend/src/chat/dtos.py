@@ -1,9 +1,23 @@
 import uuid
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
+from src.utils.constants import MAX_CHAT_MESSAGE_LENGTH
 from src.utils.enums import SenderType
+
+
+def _not_blank(value: str) -> str:
+    stripped = value.strip()
+    if not stripped:
+        raise ValueError("Message must not be empty")
+    return stripped
+
+
+MessageBody = Annotated[
+    str, Field(min_length=1, max_length=MAX_CHAT_MESSAGE_LENGTH), AfterValidator(_not_blank)
+]
 
 
 class ChatMessageOut(BaseModel):
@@ -18,4 +32,4 @@ class ChatMessageOut(BaseModel):
 
 
 class ChatMessageIn(BaseModel):
-    content: str
+    content: MessageBody

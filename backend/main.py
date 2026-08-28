@@ -1,3 +1,6 @@
+import logging
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -12,8 +15,8 @@ from src.organizations.router import router as organizations_router
 from src.request_matches.router import router as request_matches_router
 from src.requestors.router import router as requestors_router
 
-# Import all models so Base.metadata knows about every table before
-# create_all() runs. Each module is otherwise only pulled in via its router.
+# Import all models so Base.metadata knows about every table. Each module is
+# otherwise only pulled in via its router.
 from src.donors import models as _donors_models  # noqa: F401
 from src.requestors import models as _requestors_models  # noqa: F401
 from src.hospitals import models as _hospitals_models  # noqa: F401
@@ -24,27 +27,47 @@ from src.chat import models as _chat_models  # noqa: F401
 
 from src.utils.database import ensure_postgis
 from src.utils.limiter import limiter
+from src.utils.settings import settings
 
-# Schema is now managed by Alembic migrations (see alembic/ and the README
-# below) — run `alembic upgrade head` before starting the app. We still make
-# sure the PostGIS extension exists, since migrations depend on it.
-ensure_postgis()
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Schema itself is managed by Alembic (`alembic upgrade head`); we only
+    make sure the PostGIS extension exists, since migrations depend on it.
+
+    This runs on startup rather than at import time — importing the module used
+    to require a live database, which broke tests and offline schema dumps.
+    """
+    try:
+        ensure_postgis()
+    except Exception:
+        logger.exception("Could not verify the PostGIS extension — is the database reachable?")
+        raise
+    yield
+
 
 app = FastAPI(
     title="BloodBridge",
     version="0.1.0",
     description="Real-time blood donor matching platform",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Explicit origins, not "*": the previous wildcard-plus-credentials pair is
+# rejected outright by browsers, and the API authenticates with bearer tokens
+# so cookie credentials aren't needed.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # tighten to FRONTEND_URL before production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=settings.cors_origin_list,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 app.include_router(donors_router)

@@ -29,9 +29,11 @@ def get_me(hospital: Hospital = Depends(get_current_hospital)):
 
 
 @router.post("/me/logo", response_model=dtos.HospitalOut)
-async def upload_logo(
+@limiter.limit("10/minute")
+def upload_logo(
+    request: Request,
     file: UploadFile,
     hospital: Hospital = Depends(get_current_hospital),
     db: Session = Depends(get_db),
 ):
-    return await controller.upload_logo(hospital, file, db)
+    return controller.upload_logo(hospital, file, db)

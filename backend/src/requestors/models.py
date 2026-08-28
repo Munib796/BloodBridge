@@ -16,6 +16,7 @@ class Requestor(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     phone = Column(String, nullable=False)
     password_hash = Column(String, nullable=False)
+    password_changed_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=True)
     profile_pic_url = Column(String, nullable=True)
 
     is_email_verified = Column(Boolean, default=False, nullable=False)

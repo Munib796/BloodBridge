@@ -29,9 +29,11 @@ def get_me(org: Organization = Depends(get_current_organization)):
 
 
 @router.post("/me/logo", response_model=dtos.OrganizationOut)
-async def upload_logo(
+@limiter.limit("10/minute")
+def upload_logo(
+    request: Request,
     file: UploadFile,
     org: Organization = Depends(get_current_organization),
     db: Session = Depends(get_db),
 ):
-    return await controller.upload_logo(org, file, db)
+    return controller.upload_logo(org, file, db)

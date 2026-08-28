@@ -1,6 +1,6 @@
 import uuid
 
-from sqlalchemy import Column, DateTime, Enum, ForeignKey, Text
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Index, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
@@ -33,3 +33,8 @@ class ChatMessage(Base):
     sent_at = Column(DateTime(timezone=True), server_default=func.now())
 
     chat_thread = relationship("ChatThread", back_populates="messages")
+
+    __table_args__ = (
+        # History is always "this thread, oldest first".
+        Index("ix_chat_messages_thread_sent_at", "chat_thread_id", "sent_at"),
+    )

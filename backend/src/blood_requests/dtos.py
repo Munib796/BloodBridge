@@ -1,25 +1,44 @@
 import uuid
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
+from src.utils.constants import MAX_RADIUS_KM, MIN_RADIUS_KM
 from src.utils.enums import BloodType, RequestStatus, UrgencyLevel
+from src.utils.validators import (
+    FutureDatetime,
+    Label,
+    Latitude,
+    Longitude,
+    Name,
+    Phone,
+    Units,
+)
+
+Radius = Annotated[float, Field(ge=MIN_RADIUS_KM, le=MAX_RADIUS_KM)]
+Reason = Annotated[str, Field(max_length=500)]
 
 
 class BloodRequestCreate(BaseModel):
-    patient_name: str
+    patient_name: Name
     blood_type_needed: BloodType
-    units_needed: int
+    units_needed: Units
     urgency_level: UrgencyLevel
-    required_by: datetime
-    hospital_name: str | None = None  # free text; matched against registered hospitals server-side
-    contact_phone: str
-    latitude: float
-    longitude: float
-    area_label: str
+    required_by: FutureDatetime
+    hospital_name: Name | None = None  # free text; matched against registered hospitals server-side
+    contact_phone: Phone
+    latitude: Latitude
+    longitude: Longitude
+    area_label: Label
 
 
 class BloodRequestOut(BaseModel):
+    """Full detail, including patient name and contact number. Only returned
+    to the poster, the verifying hospital, an admin, or a donor/organization
+    that this request is actually reaching out to (see
+    controller.assert_can_view_request)."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
@@ -48,9 +67,11 @@ class NearbyBloodRequestOut(BloodRequestOut):
 
 
 class CancelRequest(BaseModel):
-    reason: str | None = None
+    reason: Reason | None = None
 
 
 class WidenRadiusRequest(BaseModel):
-    # if not provided, applies the standard widen step
-    to_radius_km: float | None = None
+    # If omitted, applies the standard widen step. Must be within the platform
+    # bounds — an unbounded value used to be accepted, and a negative one made
+    # the request invisible to every donor.
+    to_radius_km: Radius | None = None

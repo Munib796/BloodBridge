@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, Request, UploadFile
 from sqlalchemy.orm import Session
 
 from src.donors import controller, dtos
@@ -6,21 +6,42 @@ from src.donors.controller import get_current_donor
 from src.donors.models import Donor
 from src.utils.database import get_db
 from src.utils.limiter import limiter
-from fastapi import Request
 
 router = APIRouter(prefix="/donors", tags=["donors"])
 
 
+# Endpoints are deliberately sync `def`: SQLAlchemy calls here are blocking, and
+# FastAPI runs sync endpoints in a threadpool. Declaring them `async` ran that
+# blocking work directly on the event loop. Email is queued via BackgroundTasks.
+
 @router.post("/signup", response_model=dtos.DonorOut, status_code=201)
 @limiter.limit("5/minute")
-async def signup(request: Request, data: dtos.DonorSignup, db: Session = Depends(get_db)):
-    return await controller.signup(data, db)
+def signup(
+    request: Request,
+    data: dtos.DonorSignup,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    return controller.signup(data, db, background_tasks)
 
 
 @router.get("/verify-email")
-def verify_email(token: str, db: Session = Depends(get_db)):
+@limiter.limit("10/minute")
+def verify_email(request: Request, token: str, db: Session = Depends(get_db)):
     controller.verify_email(token, db)
     return {"message": "Email verified successfully"}
+
+
+@router.post("/resend-verification")
+@limiter.limit("3/minute")
+def resend_verification(
+    request: Request,
+    data: dtos.ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    controller.resend_verification(data, db, background_tasks)
+    return {"message": "If that email needs verifying, a new link has been sent"}
 
 
 @router.post("/login", response_model=dtos.TokenOut)
@@ -54,22 +75,30 @@ def update_profile(
 
 
 @router.post("/me/profile-pic", response_model=dtos.DonorOut)
-async def upload_profile_pic(
+@limiter.limit("10/minute")
+def upload_profile_pic(
+    request: Request,
     file: UploadFile,
     donor: Donor = Depends(get_current_donor),
     db: Session = Depends(get_db),
 ):
-    return await controller.upload_profile_pic(donor, file, db)
+    return controller.upload_profile_pic(donor, file, db)
 
 
 @router.post("/forgot-password")
 @limiter.limit("3/minute")
-async def forgot_password(request: Request, data: dtos.ForgotPasswordRequest, db: Session = Depends(get_db)):
-    await controller.forgot_password(data, db)
+def forgot_password(
+    request: Request,
+    data: dtos.ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    controller.forgot_password(data, db, background_tasks)
     return {"message": "If that email exists, a reset link has been sent"}
 
 
 @router.post("/reset-password")
-def reset_password(data: dtos.ResetPasswordRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def reset_password(request: Request, data: dtos.ResetPasswordRequest, db: Session = Depends(get_db)):
     controller.reset_password(data, db)
     return {"message": "Password reset successfully"}

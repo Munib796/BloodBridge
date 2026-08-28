@@ -4,16 +4,17 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 from src.utils.enums import ApprovalStatus
+from src.utils.validators import Address, Latitude, Longitude, Name, Password, Phone
 
 
 class OrganizationSignup(BaseModel):
-    name: str
+    name: Name
     email: EmailStr
-    phone: str
-    password: str
-    address: str
-    latitude: float
-    longitude: float
+    phone: Phone
+    password: Password
+    address: Address
+    latitude: Latitude
+    longitude: Longitude
 
 
 class OrganizationLogin(BaseModel):

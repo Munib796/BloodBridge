@@ -1,22 +1,26 @@
 import uuid
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from src.utils.enums import MatchStatus
+from src.utils.validators import FutureDatetime, Units
+
+Reason = Annotated[str, Field(max_length=500)]
 
 
 class MatchAccept(BaseModel):
-    units_committed: int
-    eta: datetime
+    units_committed: Units
+    eta: FutureDatetime
 
 
 class MatchUpdateEta(BaseModel):
-    eta: datetime
+    eta: FutureDatetime
 
 
 class MatchCancel(BaseModel):
-    reason: str | None = None
+    reason: Reason | None = None
 
 
 class RequestMatchOut(BaseModel):
