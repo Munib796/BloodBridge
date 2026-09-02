@@ -29,6 +29,11 @@ class Donor(Base):
     location = Column(GeographyPoint(nullable=True), nullable=True)
     area_label = Column(String, nullable=True)
 
+    # Push-notification token for this donor's current device, registered by
+    # the app via PATCH /donors/me/device-token. Null until it does — a donor
+    # with no token is simply skipped when a request looks for donors to notify.
+    device_token = Column(String, nullable=True)
+
     is_email_verified = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 

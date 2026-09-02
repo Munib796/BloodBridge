@@ -55,6 +55,14 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
 
+    # --- Background sweeps ---------------------------------------------------
+    # The expiry / auto-widen sweeps run on a timer inside the API process (see
+    # src/utils/scheduler.py). Set false for tests, one-off scripts, or when a
+    # single worker should own the timer while the others only serve requests.
+    # Defaulted rather than required, so an existing .env keeps working.
+    ENABLE_SCHEDULER: bool
+    SWEEP_INTERVAL_MINUTES: int
+
     @property
     def cors_origin_list(self) -> list[str]:
         raw = self.CORS_ORIGINS or self.FRONTEND_URL

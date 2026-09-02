@@ -24,6 +24,7 @@ WIDEN_AFTER_MINUTES = {
     UrgencyLevel.ROUTINE: 60,
 }
 
+
 # --- Request lifecycle ---------------------------------------------------
 # Statuses in which a request is still open to donors: it shows up in the
 # nearby feed, and is the only state from which units can be reserved.
@@ -76,6 +77,9 @@ MIN_PHONE_LENGTH = 7
 MAX_PHONE_LENGTH = 20
 MAX_ADDRESS_LENGTH = 300
 MAX_CHAT_MESSAGE_LENGTH = 2000
+# Push tokens are opaque to us; the bound is a sanity check on what a client
+# may store, not a format rule (an FCM registration token is ~160-200 chars).
+MAX_DEVICE_TOKEN_LENGTH = 512
 
 # --- Uploads -------------------------------------------------------------
 MAX_UPLOAD_BYTES = 5 * 1024 * 1024  # 5 MB

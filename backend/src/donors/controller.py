@@ -78,6 +78,19 @@ def update_profile(donor: Donor, data: dtos.DonorUpdateProfile, db: Session) -> 
     return donor
 
 
+def update_device_token(donor: Donor, data: dtos.DonorUpdateDeviceToken, db: Session) -> Donor:
+    """Register (or, with an explicit null, unregister) this donor's push token.
+
+    Unlike update_profile() a None is honoured rather than skipped: the column
+    is nullable, and clearing it is how the app says "stop notifying this
+    device" on logout.
+    """
+    donor.device_token = data.device_token
+    db.commit()
+    db.refresh(donor)
+    return donor
+
+
 def upload_profile_pic(donor: Donor, file: UploadFile, db: Session) -> Donor:
     donor.profile_pic_url = upload_image(file, folder="bloodbridge/donors")
     db.commit()

@@ -74,12 +74,24 @@ Visit `http://localhost:8000/docs` for interactive Swagger docs.
 ## What's implemented
 - **donors / requestors**: signup, email verification (+ resend), login (JWT),
   password reset, profile updates, Cloudinary picture upload
+- **donors**: push device-token registration (`PATCH /donors/me/device-token`,
+  send `null` to unregister)
 - **hospitals / organizations**: signup, admin-approval-gated login, logo upload
 - **admin**: hardcoded login, approve/reject pending hospitals and organizations
 - **blood_requests**: create (auto-detects hospital-backed vs. not), hospital
   verify (accept/reject), PostGIS nearby search for donors (blood-type
   compatible, radius by urgency), cancel, widen radius, reactivate, close,
   admin-triggered expiry and auto-widen sweeps
+- **scheduled sweeps**: expire-overdue and auto-widen run on a timer in-process
+  every `SWEEP_INTERVAL_MINUTES` (see `src/utils/scheduler.py`); the admin
+  endpoints stay available for on-demand runs. Set `ENABLE_SCHEDULER=false` to
+  turn the timer off.
+- **notification targeting**: `find_donors_to_notify()` in
+  `src/blood_requests/notifications.py` resolves the eligible, in-radius donors
+  with a registered device token when a request goes active, when a hospital
+  approves one, and when a sweep widens one's radius. The send itself is a
+  logged intent (`Would notify N donors about request ...`) until there is a
+  frontend handing out real tokens.
 - **request_matches**: accept (atomic — race-condition safe, and re-validates
   blood-type compatibility + distance), update ETA, cancel (reopens the
   request), mark complete (settles the request to `fulfilled`), list mine
@@ -119,11 +131,15 @@ Other things worth knowing:
 - The chat WebSocket broadcaster is also per-process, so with multiple uvicorn
   workers a live message only reaches sockets on the same worker. REST history
   stays authoritative.
+- The sweep scheduler is per-process too: every worker would run its own copy.
+  The sweeps are idempotent, so that is safe rather than wrong, but with
+  `--workers N` set `ENABLE_SCHEDULER=false` on all but one.
 
 ## Not yet built
 - Donor eligibility (90-day) enforcement
 - Donor cancellation-rate tracking
-- A real scheduler for `POST /blood-requests/admin/auto-widen` and
-  `POST /blood-requests/admin/expire-overdue` (both are manual endpoints today)
-- Push notifications (Flutter app will consume the API later)
+- Actually sending push notifications. Who to notify is resolved and logged
+  (`find_donors_to_notify()`); the FCM call is a `TODO` in
+  `src/blood_requests/notifications.py`, waiting on a frontend to register real
+  device tokens.
 - Automated tests

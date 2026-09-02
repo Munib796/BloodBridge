@@ -4,7 +4,7 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, EmailStr
 
 from src.utils.enums import BloodType
-from src.utils.validators import Label, Latitude, Longitude, Name, Password, Phone
+from src.utils.validators import DeviceToken, Label, Latitude, Longitude, Name, Password, Phone
 
 
 class DonorSignup(BaseModel):
@@ -32,6 +32,13 @@ class DonorUpdateProfile(BaseModel):
     blood_type: BloodType | None = None
 
 
+class DonorUpdateDeviceToken(BaseModel):
+    # Required but nullable: an explicit null unregisters the device (logout,
+    # or the OS rotating the token), which is a real operation rather than the
+    # "field omitted" case DonorUpdateProfile has to ignore.
+    device_token: DeviceToken | None
+
+
 class DonorOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -42,6 +49,9 @@ class DonorOut(BaseModel):
     blood_type: BloodType
     profile_pic_url: str | None
     area_label: str | None
+    # Only ever returned on the donor's own /donors/me* endpoints, so this
+    # doesn't hand one donor's push token to anybody else.
+    device_token: str | None
     is_email_verified: bool
     is_active: bool
     created_at: datetime

@@ -8,6 +8,7 @@ from pydantic import AfterValidator, Field
 
 from src.utils.constants import (
     MAX_ADDRESS_LENGTH,
+    MAX_DEVICE_TOKEN_LENGTH,
     MAX_NAME_LENGTH,
     MAX_PASSWORD_LENGTH,
     MAX_PHONE_LENGTH,
@@ -59,3 +60,6 @@ Name = Annotated[str, Field(min_length=1, max_length=MAX_NAME_LENGTH), AfterVali
 Phone = Annotated[str, Field(min_length=MIN_PHONE_LENGTH, max_length=MAX_PHONE_LENGTH), AfterValidator(_strip)]
 Address = Annotated[str, Field(min_length=1, max_length=MAX_ADDRESS_LENGTH), AfterValidator(_strip)]
 Label = Annotated[str, Field(min_length=1, max_length=MAX_NAME_LENGTH), AfterValidator(_strip)]
+DeviceToken = Annotated[
+    str, Field(min_length=1, max_length=MAX_DEVICE_TOKEN_LENGTH), AfterValidator(_strip)
+]

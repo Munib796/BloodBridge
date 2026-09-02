@@ -27,6 +27,7 @@ from src.chat import models as _chat_models  # noqa: F401
 
 from src.utils.database import ensure_postgis
 from src.utils.limiter import limiter
+from src.utils.scheduler import shutdown_scheduler, start_scheduler
 from src.utils.settings import settings
 
 logging.basicConfig(level=logging.INFO)
@@ -36,17 +37,25 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Schema itself is managed by Alembic (`alembic upgrade head`); we only
-    make sure the PostGIS extension exists, since migrations depend on it.
+    make sure the PostGIS extension exists, since migrations depend on it, then
+    start the timer that runs the expire-overdue / auto-widen sweeps.
 
     This runs on startup rather than at import time — importing the module used
-    to require a live database, which broke tests and offline schema dumps.
+    to require a live database, which broke tests and offline schema dumps, and
+    it is also why the scheduler starts here: importing the app must never
+    leave a background timer running behind it.
     """
     try:
         ensure_postgis()
     except Exception:
         logger.exception("Could not verify the PostGIS extension — is the database reachable?")
         raise
-    yield
+
+    start_scheduler()
+    try:
+        yield
+    finally:
+        shutdown_scheduler()
 
 
 app = FastAPI(

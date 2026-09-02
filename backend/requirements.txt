@@ -13,3 +13,4 @@ fastapi-mail
 slowapi
 python-multipart
 websockets
+apscheduler

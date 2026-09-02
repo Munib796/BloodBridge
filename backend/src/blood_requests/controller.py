@@ -6,7 +6,7 @@ from sqlalchemy import func as sa_func
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from src.blood_requests import dtos
+from src.blood_requests import dtos, notifications
 from src.blood_requests.models import BloodRequest
 from src.donors.models import Donor
 from src.hospitals.models import Hospital
@@ -68,6 +68,11 @@ def create_request(data: dtos.BloodRequestCreate, db: Session, identity: Identit
     db.add(blood_request)
     db.commit()
     db.refresh(blood_request)
+
+    # A hospital-backed request is PENDING_VERIFICATION at this point: donors
+    # only hear about it once the hospital approves (see hospital_decide).
+    if blood_request.status == RequestStatus.ACTIVE:
+        notifications.notify_donors_for_request(blood_request, db, trigger="request created")
     return blood_request
 
 
@@ -202,6 +207,9 @@ def hospital_decide(request_id: str, approve: bool, hospital: Hospital, db: Sess
     blood_request.status = RequestStatus.ACTIVE if approve else RequestStatus.REJECTED
     db.commit()
     db.refresh(blood_request)
+
+    if blood_request.status == RequestStatus.ACTIVE:
+        notifications.notify_donors_for_request(blood_request, db, trigger="hospital approved")
     return blood_request
 
 
@@ -405,7 +413,7 @@ def auto_widen_stale_requests(db: Session) -> int:
         .all()
     )
 
-    widened = 0
+    widened: list[BloodRequest] = []
     for blood_request in candidates:
         # Measured from the last touch, so a request isn't widened twice in
         # consecutive sweeps.
@@ -422,10 +430,17 @@ def auto_widen_stale_requests(db: Session) -> int:
         blood_request.current_radius_km = min(
             blood_request.current_radius_km + RADIUS_WIDEN_STEP_KM, MAX_RADIUS_KM
         )
-        widened += 1
+        widened.append(blood_request)
 
     db.commit()
-    return widened
+
+    # After the commit, not inside the loop: donors are notified against the
+    # radius that is actually stored, and one failing notification can't undo
+    # the widening of every request in the batch.
+    for blood_request in widened:
+        notifications.notify_donors_for_request(blood_request, db, trigger="radius widened")
+
+    return len(widened)
 
 
 # --- Unit accounting ------------------------------------------------------
