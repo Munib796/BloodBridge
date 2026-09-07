@@ -1,56 +1,62 @@
-# Welcome to your Expo app 👋
+# BloodBridge — mobile app
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo React Native app (SDK 57) for the donor and requestor sides of
+[BloodBridge](../README.md). File-based routing via expo-router using the `src/app`
+convention, TypeScript throughout.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- Node 20+
+- The [backend](../backend/SETUP.md) running and reachable from your phone —
+  same Wi-Fi network, or a tunnel.
+- Expo Go on a physical device for day-to-day work. Note that push notifications
+  and native maps need a development build instead; see below.
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Running it
 
 ```bash
-npm run reset-project
+npm install
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Scan the QR code with Expo Go. The app derives the API host from the Metro
+connection, so on the same network it finds the backend with no configuration.
+To point it somewhere else — a tunnel, a staging deploy — set `EXPO_PUBLIC_API_URL`
+in `.env` (copy `.env.example`).
 
-### Other setup steps
+If your phone can't reach your machine directly, tunnel Metro *and* the API:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npx expo start --tunnel
+```
 
-## Learn more
+## Development build
 
-To learn more about developing your project with Expo, look at the following resources:
+Expo Go can't do remote push notifications on Android (dropped in SDK 53) and
+can't use a keyed Google Maps instance. Once either is in play, build locally:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npx expo run:android
+```
 
-## Join the community
+This generates `android/` (gitignored — it's regenerated from `app.config.ts`, so
+never edit it by hand) and installs a dev client on the attached device. Metro
+still serves the JS, so the reload loop is unchanged.
 
-Join our community of developers creating universal apps.
+## Layout
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+```
+src/
+  api/         axios client + typed request functions, one module per resource
+  app/         routes. (auth) (donor) (requestor) are route groups
+  components/  shared UI
+  store/       Zustand stores, persisted through expo-secure-store
+  theme/       design tokens and the theme provider
+  utils/       formatting and hooks
+```
+
+## Checks
+
+```bash
+npx tsc --noEmit
+```
