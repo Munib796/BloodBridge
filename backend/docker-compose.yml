@@ -23,6 +23,3 @@ services:
 
 volumes:
   bloodbridge_data:
-
-# <<<<<--------URl STRING-------->>>>>>>>
-# DATABASE_URL = "postgresql://bloodbridge_user:bloodbridge_pass@localhost:5432/bloodbridge"
