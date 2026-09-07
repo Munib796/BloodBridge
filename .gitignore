@@ -1,10 +1,32 @@
+# Python / backend
 __pycache__/
 *.pyc
 .venv/
 venv/
-.env
 *.egg-info/
 .pytest_cache/
+
+# Node / Expo app
+node_modules/
+.expo/
+dist/
+web-build/
+*.tsbuildinfo
+.metro-health-check*
+
+# Generated native projects (CNG regenerates these)
+bloodbridge-app/android/
+bloodbridge-app/ios/
+
+# Secrets and local config
+.env
+.env.local
+.env*.local
+
+# Editors
 .vscode/
 .idea/
+
+# Misc
 *.log
+.DS_Store
