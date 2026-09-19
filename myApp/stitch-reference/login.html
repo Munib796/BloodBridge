@@ -1,0 +1,170 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>BloodBridge — Login</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS v3 with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#C8102E',
+              dark: '#A60D25',
+              soft: '#FFF1F2',
+              tint: '#FDE8EB'
+            },
+            slate: {
+              850: '#151F32',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            'crimson': '0 8px 24px -4px rgba(200, 16, 46, 0.25)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Base Custom Styling -->
+<style data-purpose="custom-resets">
+    body {
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      font-family: 'Inter', sans-serif;
+    }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0px 1000px #F8FAFC inset;
+      transition: background-color 5000s ease-in-out 0s;
+    }
+  </style>
+</head>
+<body class="bg-[#FAFAFC] text-slate-900 min-h-screen flex justify-center items-start sm:py-8 antialiased selection:bg-rose-100 selection:text-brand">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="w-full max-w-md bg-white min-h-screen sm:min-h-[844px] sm:rounded-[40px] sm:shadow-2xl sm:border sm:border-slate-100 flex flex-col justify-between overflow-hidden relative" data-purpose="mobile-viewport-container">
+<!-- BEGIN: TopBar -->
+<header class="px-6 pt-6 pb-2 flex items-center justify-between relative z-10">
+<!-- Back Navigation Button -->
+<button aria-label="Go back" class="w-10 h-10 rounded-full bg-slate-100/80 hover:bg-slate-200/80 active:scale-95 flex items-center justify-center transition text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand/30" data-purpose="back-button" onclick="history.back()" type="button">
+<svg class="w-5 h-5 -ml-0.5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="15 18 9 12 15 6"></polyline>
+</svg>
+</button>
+<!-- Brand Logo Mark -->
+<div class="flex items-center justify-center" data-purpose="brand-logo-container">
+<img alt="BloodBridge Logo" class="w-10 h-10 rounded-xl shadow-sm" data-purpose="brand-logo-image" src="https://lh3.googleusercontent.com/aida/AEtjO1X8aJMK8JgSIe47vwqXN1nyEXQ78sxmX-_V7gmXPdt5ylFxciP_4UTabLKYWE2Z6yQNA7c4oSjmMvcyLYp9n7Y-ry1yuc8ZYCLKdMU2SfgyHELP1FMj9mQ99ckRytfgmO3jtJI2xpvy4LvSaA8k97VVS9n8f7PsbDhNno0b6tnqkqaBSCs24D3YBs81PIDnHieftbOVnMNhIogofSuJu2nsn0VagLWHIhkW9foUtLxbzNkjnQE_Dild5A">
+</div>
+<!-- Empty spacer element for symmetric layout -->
+<div aria-hidden="true" class="w-10 h-10"></div>
+</header>
+<!-- END: TopBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-6 pt-6 pb-8 flex flex-col justify-start">
+<!-- Header Titles -->
+<div class="mt-2 mb-8" data-purpose="page-headline-block">
+<h1 class="text-3xl font-bold tracking-tight text-[#0F172A]">Welcome Back</h1>
+<p class="text-[#64748B] text-[15px] mt-2 font-normal leading-relaxed">Log in to continue saving lives</p>
+</div>
+<!-- BEGIN: LoginForm -->
+<form action="#" class="space-y-5" data-purpose="login-form" method="POST" onsubmit="event.preventDefault();">
+<!-- Email Input Field -->
+<div class="space-y-1.5" data-purpose="input-group-email">
+<label class="block text-sm font-medium text-[#334155]" for="email">Email</label>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<rect height="16" rx="2" width="20" x="2" y="4"></rect>
+<path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path>
+</svg>
+</div>
+<input autocomplete="email" class="w-full h-[52px] pl-11 pr-4 bg-[#F8FAFC] border border-[#E2E8F0] rounded-[12px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/20 focus:border-[#C8102E] transition text-[15px]" id="email" name="email" placeholder="name@example.com" required="" type="email">
+</div>
+</div>
+<!-- Password Input Field -->
+<div class="space-y-1.5" data-purpose="input-group-password">
+<label class="block text-sm font-medium text-[#334155]" for="password">Password</label>
+<div class="relative">
+<input autocomplete="current-password" class="w-full h-[52px] pl-4 pr-11 bg-[#F8FAFC] border border-[#E2E8F0] rounded-[12px] text-slate-900 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C8102E]/20 focus:border-[#C8102E] transition text-[15px]" id="password" name="password" placeholder="••••••••" required="" type="password">
+<!-- Show/Hide Password Toggle Button -->
+<button aria-label="Toggle password visibility" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none" data-purpose="password-visibility-toggle" id="togglePassword" type="button">
+<!-- Eye Icon (Show) -->
+<svg class="w-5 h-5" fill="none" id="eyeIcon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+<circle cx="12" cy="12" r="3"></circle>
+</svg>
+<!-- Eye Off Icon (Hide, hidden by default) -->
+<svg class="w-5 h-5 hidden" fill="none" id="eyeOffIcon" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"></path>
+<path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"></path>
+<path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"></path>
+<line x1="2" x2="22" y1="2" y2="22"></line>
+</svg>
+</button>
+</div>
+<!-- Forgot Password Link -->
+<div class="flex justify-end pt-1" data-purpose="forgot-password-link">
+<a class="text-sm font-medium text-[#C8102E] hover:underline focus:outline-none" href="#">
+              Forgot Password?
+            </a>
+</div>
+</div>
+<!-- Primary Action Button -->
+<div class="pt-2" data-purpose="submit-action-container">
+<button class="w-full h-[56px] bg-[#C8102E] hover:bg-[#A60D25] active:scale-[0.99] text-white font-bold text-base rounded-[16px] shadow-crimson transition flex items-center justify-center space-x-2 focus:outline-none focus:ring-4 focus:ring-[#C8102E]/25" data-purpose="primary-login-button" type="submit">
+<span class="">Log In</span>
+</button>
+</div>
+</form><div class="mt-6 space-y-4" data-purpose="social-login-section"><div class="relative flex items-center justify-center"><div class="w-full border-t border-[#E2E8F0]"></div><span class="absolute bg-white px-3 text-xs uppercase tracking-wider text-[#64748B] font-medium">or</span></div><div class="flex flex-col space-y-3"><button type="button" class="w-full h-[48px] bg-white border border-[#E2E8F0] hover:bg-slate-50 active:scale-[0.99] text-slate-800 font-medium text-sm rounded-[12px] transition flex items-center justify-center space-x-2.5 focus:outline-none focus:ring-2 focus:ring-slate-200 shadow-sm"><svg class="w-4 h-4" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"></path><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"></path></svg><span class="">Continue with Google</span></button><button type="button" class="w-full h-[48px] bg-black hover:bg-neutral-900 active:scale-[0.99] text-white font-medium text-sm rounded-[12px] transition flex items-center justify-center space-x-2.5 focus:outline-none focus:ring-2 focus:ring-neutral-800 shadow-sm"><svg class="w-4 h-4 fill-current" viewBox="0 0 170 170"><path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.7-7.85-12-14.42-6.42-9.79-11.43-20.9-15.02-33.34-3.59-12.44-5.39-24.36-5.39-35.76 0-14.52 3.65-26.65 10.96-36.38 7.3-9.74 16.48-14.73 27.53-14.99 4.35 0 9.38 1.19 15.09 3.56 5.71 2.37 9.49 3.61 11.35 3.73 1.63 0 5.64-1.36 12.03-4.08 6.39-2.72 11.75-3.96 16.08-3.73 12.63.66 22.45 5.24 29.46 13.73-11.09 6.72-16.51 16.14-16.27 28.26.24 9.57 3.86 17.65 10.87 24.23 7.01 6.58 15.35 10.37 25.01 11.37-2.39 7.18-5.26 14.5-8.61 21.96zm-27.17-111.44c0 7.07-2.6 13.75-7.81 20.03-5.21 6.28-11.59 10.15-19.14 11.61-.43-1.3-.65-2.6-.65-3.91 0-6.95 2.82-13.88 8.47-20.78 5.65-6.9 12.03-10.86 19.13-11.89v4.94z"></path></svg><span class="">Continue with Apple</span></button></div></div>
+<!-- END: LoginForm -->
+<!-- BEGIN: Divider -->
+
+<!-- END: Divider -->
+<!-- BEGIN: SecondaryAction -->
+<div class="text-center pb-4 mt-6" data-purpose="signup-prompt">
+<p class="text-sm text-slate-600 font-normal">
+          Don't have an account? 
+          <a class="font-semibold text-[#C8102E] hover:underline ml-1 focus:outline-none" href="#">Sign Up</a>
+</p>
+</div>
+<!-- END: SecondaryAction -->
+</main>
+<!-- END: MainContent -->
+</div>
+<!-- END: MobileDeviceFrame -->
+<!-- BEGIN: InteractiveScripts -->
+<script data-purpose="password-visibility-handler">
+    const toggleButton = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const eyeIcon = document.getElementById('eyeIcon');
+    const eyeOffIcon = document.getElementById('eyeOffIcon');
+
+    toggleButton.addEventListener('click', function () {
+      const isPassword = passwordInput.getAttribute('type') === 'password';
+      
+      if (isPassword) {
+        passwordInput.setAttribute('type', 'text');
+        eyeIcon.classList.add('hidden');
+        eyeOffIcon.classList.remove('hidden');
+      } else {
+        passwordInput.setAttribute('type', 'password');
+        eyeIcon.classList.remove('hidden');
+        eyeOffIcon.classList.add('hidden');
+      }
+    });
+  </script>
+<!-- END: InteractiveScripts -->
+
+
+
+
+</body></html>

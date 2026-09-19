@@ -1,0 +1,35 @@
+import { StyleSheet } from "react-native";
+
+import { colors } from "../theme/colors";
+
+export const cancelCommitmentModalStyles = StyleSheet.create({
+  backdrop: { flex: 1, backgroundColor: "rgba(15,23,42,0.45)", justifyContent: "flex-end" },
+  sheet: { width: "100%", borderTopLeftRadius: 28, borderTopRightRadius: 28, backgroundColor: colors.surface, overflow: "hidden" },
+  handle: { width: 48, height: 6, borderRadius: 3, backgroundColor: "#cbd5e1", alignSelf: "center", marginTop: 12, marginBottom: 12 },
+  closeButton: { position: "absolute", top: 14, right: 16, width: 32, height: 32, borderRadius: 16, backgroundColor: colors.slateSoft, alignItems: "center", justifyContent: "center", zIndex: 1 },
+  content: { paddingHorizontal: 20, paddingTop: 2, paddingBottom: 24 },
+  header: { paddingRight: 36, marginBottom: 16 },
+  title: { color: colors.text, fontSize: 22, lineHeight: 28, fontWeight: "800" },
+  subtitle: { color: colors.mutedText, fontSize: 13, lineHeight: 19, marginTop: 6 },
+  contextCard: { padding: 12, borderRadius: 14, borderWidth: 1, borderColor: colors.crimsonBorder, backgroundColor: colors.crimsonSoft, gap: 8, marginBottom: 14 },
+  contextTop: { flexDirection: "row", alignItems: "center", gap: 7 },
+  contextBadge: { color: colors.crimson, fontSize: 11, fontWeight: "800" },
+  contextTitle: { color: colors.text, fontSize: 14, lineHeight: 19, fontWeight: "800" },
+  contextMeta: { color: colors.mutedText, fontSize: 11, lineHeight: 16 },
+  warning: { padding: 12, borderRadius: 12, backgroundColor: colors.amberSoft, borderWidth: 1, borderColor: colors.amberBorder, flexDirection: "row", alignItems: "flex-start", gap: 8, marginBottom: 16 },
+  warningText: { flex: 1, color: colors.amberText, fontSize: 11, lineHeight: 16, fontWeight: "600" },
+  labelRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 },
+  label: { color: colors.text, fontSize: 12, lineHeight: 17, fontWeight: "800" },
+  counter: { color: colors.mutedText, fontSize: 11 },
+  input: { minHeight: 76, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 12, color: colors.text, fontSize: 14, textAlignVertical: "top" },
+  inputFocused: { borderColor: colors.crimson },
+  helper: { color: colors.mutedText, fontSize: 11, lineHeight: 16, marginTop: 7, marginBottom: 18 },
+  errorBox: { flexDirection: "row", alignItems: "flex-start", gap: 7, padding: 11, borderRadius: 10, borderWidth: 1, borderColor: colors.crimsonBorder, backgroundColor: colors.crimsonSoft, marginBottom: 14 },
+  errorText: { flex: 1, color: colors.crimson, fontSize: 11, lineHeight: 16, fontWeight: "600" },
+  actions: { gap: 8 },
+  cancelButton: { height: 50, borderRadius: 12, backgroundColor: colors.crimson, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: 7 },
+  busy: { opacity: 0.7 },
+  cancelButtonText: { color: colors.surface, fontSize: 15, fontWeight: "800" },
+  keepButton: { height: 36, alignItems: "center", justifyContent: "center" },
+  keepText: { color: colors.mutedText, fontSize: 13, fontWeight: "700" },
+});

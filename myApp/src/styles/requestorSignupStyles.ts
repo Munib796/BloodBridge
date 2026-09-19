@@ -1,0 +1,48 @@
+import { StyleSheet } from "react-native";
+
+export const requestorSignupStyles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: "#faf8ff" },
+  screen: { flexGrow: 1, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 32, backgroundColor: "#faf8ff" },
+  topBar: { height: 48, marginBottom: 30, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  backButton: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: "#e2e8f0", backgroundColor: "#ffffff", alignItems: "center", justifyContent: "center", shadowColor: "#0f172a", shadowOpacity: 0.04, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  logo: { width: 48, height: 48, borderRadius: 16 },
+  topBarSpacer: { width: 44, height: 44, opacity: 0 },
+  headingBlock: { marginBottom: 24 },
+  title: { color: "#0f172a", fontSize: 28, lineHeight: 34, fontWeight: "700", letterSpacing: -0.5 },
+  subtitle: { color: "#64748b", fontSize: 15, lineHeight: 22, marginTop: 8 },
+  form: { gap: 16 },
+  fieldGroup: { gap: 6 },
+  label: { color: "#0f172a", fontSize: 14, lineHeight: 20, fontWeight: "600" },
+  inputShell: { height: 52, paddingHorizontal: 14, borderRadius: 16, borderWidth: 1, borderColor: "#e2e8f0", backgroundColor: "#ffffff", flexDirection: "row", alignItems: "center", shadowColor: "#0f172a", shadowOpacity: 0.03, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  input: { flex: 1, color: "#0f172a", fontSize: 15, marginLeft: 9, paddingVertical: 0 },
+  phoneRow: { flexDirection: "row", gap: 10 },
+  countrySelector: { width: 76, height: 52, paddingHorizontal: 12, borderRadius: 16, borderWidth: 1, borderColor: "#e2e8f0", backgroundColor: "#ffffff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7, shadowColor: "#0f172a", shadowOpacity: 0.03, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  countryLabel: { color: "#64748b", fontSize: 12, fontWeight: "600" },
+  countryCode: { color: "#0f172a", fontSize: 14, fontWeight: "600" },
+  phoneInput: { flex: 1, height: 52, paddingHorizontal: 14, borderRadius: 16, borderWidth: 1, borderColor: "#e2e8f0", backgroundColor: "#ffffff", color: "#0f172a", fontSize: 15, shadowColor: "#0f172a", shadowOpacity: 0.03, shadowRadius: 3, shadowOffset: { width: 0, height: 1 }, elevation: 1 },
+  strengthTrack: { height: 6, marginTop: 10, borderRadius: 3, flexDirection: "row", gap: 6 },
+  strengthSegment: { flex: 1, borderRadius: 3, backgroundColor: "#e2e8f0" },
+  strengthMeta: { flexDirection: "row", justifyContent: "space-between", marginTop: 5 },
+  mutedText: { color: "#94a3b8", fontSize: 11 },
+  createButton: { height: 56, borderRadius: 16, backgroundColor: "#c8102e", alignItems: "center", justifyContent: "center", marginTop: 2, shadowColor: "#c8102e", shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 7 }, elevation: 4 },
+  createButtonText: { color: "#ffffff", fontSize: 16, fontWeight: "600" },
+  legalText: { color: "#64748b", fontSize: 13, lineHeight: 18, textAlign: "center", marginTop: -2 },
+  legalLink: { color: "#c8102e", fontWeight: "500" },
+  pressed: { opacity: 0.86, transform: [{ scale: 0.99 }] },
+
+  // --- Feedback states -----------------------------------------------------
+  // Colours are the same as loginStyles so the two screens read as one product.
+  inputShellError: { borderColor: "#fecdd3" },
+  fieldError: { color: "#b42318", fontSize: 13, lineHeight: 18 },
+  errorText: { color: "#b42318", fontSize: 14, lineHeight: 20 },
+  buttonDisabled: { opacity: 0.65 },
+
+  successCard: { marginTop: 4, padding: 20, borderRadius: 16, borderWidth: 1, borderColor: "#a7f3d0", backgroundColor: "#ecfdf5", gap: 10 },
+  successHeading: { flexDirection: "row", alignItems: "center", gap: 8 },
+  successTitle: { color: "#047857", fontSize: 19, fontWeight: "700" },
+  successBody: { color: "#065f46", fontSize: 14, lineHeight: 21 },
+  successEmail: { fontWeight: "700" },
+  resendLink: { minHeight: 44, alignItems: "center", justifyContent: "center", paddingVertical: 8 },
+  resendLinkText: { color: "#c8102e", fontSize: 14, fontWeight: "600" },
+  resendNote: { color: "#047857", fontSize: 13, lineHeight: 18 },
+});

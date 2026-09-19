@@ -1,0 +1,370 @@
+<!DOCTYPE html><html lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>BloodBridge — Request Detail (Requestor)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#c8102e',
+              dark: '#a00c24',
+              light: '#fff1f2',
+              border: '#fecdd3',
+              surface: '#faf8ff'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #faf8ff;
+      color: #1e293b;
+      -webkit-font-smoothing: antialiased;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .custom-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#faf8ff] text-slate-800 min-h-screen">
+<!-- Mobile Container (Max 420px width strictly mobile container) -->
+<div class="w-full bg-[#faf8ff] min-h-screen flex flex-col pb-28 relative">
+<!-- Top App Bar Navigation -->
+<header class="sticky top-0 z-30 bg-[#faf8ff]/95 backdrop-blur-md border-b border-slate-100 px-4 py-3 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<button aria-label="Go Back" class="w-9 h-9 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-50 transition active:scale-95 shadow-sm" type="button">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="inline-block w-2 h-2 rounded-full bg-[#c8102e] animate-pulse"></span>
+<span class="text-[11px] font-bold tracking-wider uppercase text-[#c8102e]">Live Broadcast</span>
+</div>
+<h1 class="text-base font-bold text-slate-900 leading-tight">Request Details</h1>
+</div>
+</div>
+<!-- Quick Status Pill -->
+<span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+        Partially Matched
+      </span>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 px-4 pt-4 space-y-4">
+<!-- Patient & Request Overview Card -->
+<section class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm relative overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-[#c8102e]"></div>
+<!-- Header Tags & Blood Type Box -->
+<div class="flex items-start justify-between gap-3 pt-1 mb-3">
+<div class="space-y-1.5">
+<!-- Urgency & Hospital Badges -->
+<div class="flex flex-wrap items-center gap-1.5">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-[#c8102e] border border-rose-200">
+<span class="w-1.5 h-1.5 rounded-full bg-[#c8102e]"></span>
+                CRITICAL
+              </span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+<svg class="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M4.5 12.75l6 6 9-13.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+                Verified Hospital
+              </span>
+</div>
+<!-- Patient Name & Facility -->
+<div>
+<p class="text-[10px] font-bold tracking-wider uppercase text-slate-400">PATIENT</p>
+<h2 class="text-lg font-bold text-slate-900 leading-tight">Zainab Bibi</h2>
+<div class="flex items-center gap-1 text-xs text-slate-600 mt-0.5">
+<svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="">Jinnah Hospital, Lahore</span>
+</div>
+</div>
+</div>
+<!-- Blood Type Tile -->
+<div class="bg-rose-50/80 border border-rose-200 rounded-xl px-3 py-2 text-center min-w-[72px] shrink-0">
+<span class="block text-xl font-black text-[#c8102e] leading-tight">O-</span>
+<span class="block text-[9px] font-extrabold tracking-wider text-[#c8102e]/80 uppercase">NEEDED</span>
+</div>
+</div>
+<!-- Progress Section -->
+<div class="bg-slate-50 rounded-xl p-3 border border-slate-100 mb-3">
+<div class="flex justify-between items-center text-xs mb-1.5">
+<span class="font-medium text-slate-500">Units Secured</span>
+<span class="font-bold text-slate-900"><span class="text-[#c8102e]">2</span> of 4 units secured</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden flex">
+<div class="h-full bg-[#c8102e] rounded-full transition-all duration-500" style="width: 50%;"></div>
+</div>
+<div class="flex justify-between items-center mt-2 text-[11px] text-slate-600">
+<span class="inline-flex items-center gap-1 font-medium text-amber-700"><svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              2 more units needed
+            </span>
+<span class="text-slate-500">50% completed</span>
+</div>
+</div>
+<!-- Scope & Logistics Specs -->
+<div class="grid grid-cols-2 gap-2 text-xs">
+<div class="bg-slate-50/90 rounded-lg p-2.5 border border-slate-100 flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-rose-50 text-[#c8102e] flex items-center justify-center shrink-0">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-semibold">Broadcast Radius</p>
+<p class="font-bold text-slate-800">Within 8 km</p>
+</div>
+</div>
+<div class="bg-slate-50/90 rounded-lg p-2.5 border border-slate-100 flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-rose-50 text-[#c8102e] flex items-center justify-center shrink-0">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<p class="text-[10px] text-slate-400 uppercase font-semibold">Required By</p>
+<p class="font-bold text-slate-800">Today, 5:30 PM</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Committed Donors Section -->
+<section class="space-y-3">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h3 class="text-sm font-bold text-slate-900">Donor Commitments</h3>
+<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#c8102e]/10 text-[#c8102e]">
+              2 Active
+            </span>
+</div>
+<span class="text-[11px] text-slate-500 font-medium">Real-time matches</span>
+</div>
+<!-- Donor Commitment Cards List -->
+<div class="space-y-2.5">
+<!-- Donor Card 1: Accepted & In Transit -->
+<div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-[#c8102e]/10 text-[#c8102e] font-bold flex items-center justify-center text-sm">
+                  AR
+                </div>
+<div>
+<div class="flex items-center gap-1.5">
+<h4 class="text-xs font-bold text-slate-900">Ahmed Raza</h4>
+<span class="text-[10px] font-semibold text-slate-400">· 1 Unit</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Accepted
+                    </span>
+<span class="text-[11px] font-medium text-slate-500">Donor confirmed</span>
+</div>
+</div>
+</div>
+<!-- Direct Contact Buttons (Allowed because status is accepted) -->
+<div class="flex items-center gap-1.5">
+<a class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition active:scale-95" href="tel:+923001234567">
+<svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+                  Call
+                </a>
+<a class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition active:scale-95" href="sms:+923001234567">
+<svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.874-.997 4.39 4.39 0 00.523-1.895C3.766 16.51 3 14.398 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+                  Message
+                </a>
+</div>
+</div>
+<!-- In-Transit Status Micro-Bar -->
+<div class="bg-slate-50 border border-slate-100 rounded-lg p-2 text-[11px] text-slate-700 flex items-center gap-1.5 font-medium"><svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="">Expected to arrive in ~25 mins</span></div>
+</div>
+<!-- Donor Card 2: Accepted & En Route -->
+<div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-sm space-y-3">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-slate-100 text-slate-700 font-bold flex items-center justify-center text-sm">
+                  UK
+                </div>
+<div>
+<div class="flex items-center gap-1.5">
+<h4 class="text-xs font-bold text-slate-900">Usman Khan</h4>
+<span class="text-[10px] font-semibold text-slate-400">· 1 Unit</span>
+</div>
+<div class="flex items-center gap-1.5 mt-0.5">
+<span class="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Accepted
+                    </span>
+<span class="text-[11px] font-medium text-slate-500">Donor confirmed</span>
+</div>
+</div>
+</div>
+<!-- Direct Contact Buttons -->
+<div class="flex items-center gap-1.5">
+<a class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition active:scale-95" href="tel:+923214567890">
+<svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+                  Call
+                </a>
+<a class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition active:scale-95" href="sms:+923214567890">
+<svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a.75.75 0 01-.874-.997 4.39 4.39 0 00.523-1.895C3.766 16.51 3 14.398 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+                  Message
+                </a>
+</div>
+</div>
+<!-- In-Transit Status Micro-Bar -->
+<div class="bg-slate-50 border border-slate-100 rounded-lg p-2 text-[11px] text-slate-700 flex items-center gap-1.5 font-medium"><svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="">Expected to arrive in ~45 mins</span></div>
+</div>
+<!-- Pending Matching State Callout (Showing search is still in-flight for remaining 2 units) -->
+<div class="bg-rose-50/60 border border-dashed border-rose-200 rounded-xl p-3 flex items-center gap-3">
+<div class="w-7 h-7 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
+<svg class="w-4 h-4 text-[#c8102e] animate-spin" fill="none" viewBox="0 0 24 24">
+<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+<path class="opacity-75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" fill="currentColor"></path>
+</svg>
+</div>
+<div class="text-xs">
+<p class="font-semibold text-slate-800">Searching for 2 additional compatible donors</p>
+<p class="text-[11px] text-slate-500 mt-0.5">Broadcasting in 8 km perimeter · Alerting verified O- donors</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Manual Override Actions Section (Secondary Controls) -->
+<section class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+<div class="flex items-center justify-between">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-500">Broadcast Adjustments</h3>
+<span class="text-[11px] text-slate-400">Backend real-time sync</span>
+</div>
+<p class="text-xs text-slate-600">
+          Need to expedite matching or reach more potential donors immediately?
+        </p>
+<div class="grid grid-cols-2 gap-2 pt-1">
+<!-- Widen Radius Button -->
+<button class="flex flex-col items-start p-3 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 transition text-left group active:scale-98" type="button">
+<div class="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-700 flex items-center justify-center mb-2 shadow-xs group-hover:text-[#c8102e]">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-xs font-bold text-slate-900 group-hover:text-[#c8102e] transition">Widen Radius</span>
+<span class="text-[10px] text-slate-500 mt-0.5">Increase your search area to reach more donors</span>
+</button>
+<!-- Escalate Urgency Button -->
+<button class="flex flex-col items-start p-3 rounded-xl border border-rose-200 bg-rose-50/40 hover:bg-rose-50 transition text-left group active:scale-98" type="button">
+<div class="w-7 h-7 rounded-lg bg-white border border-rose-200 text-[#c8102e] flex items-center justify-center mb-2 shadow-xs">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-xs font-bold text-slate-900 group-hover:text-[#c8102e] transition">Escalate Urgency</span>
+<span class="text-[10px] text-slate-500 mt-0.5">Raise the urgency level to prioritize this request.</span>
+</button>
+</div>
+</section>
+<!-- De-emphasized Cancel Broadcast Action -->
+<section class="pt-2 pb-1 text-center">
+<!-- Interactive trigger button for modal -->
+<button class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-rose-600 transition px-3 py-2 rounded-lg hover:bg-rose-50/50" onclick="document.getElementById('cancel-modal').classList.remove('hidden')" type="button">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          Cancel this request
+        </button>
+</section>
+</main>
+<!-- Cancel Confirmation Drawer / Modal (Hidden by default, styled per backend optional reason requirement) -->
+<div class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-end justify-center p-0 sm:p-4" id="cancel-modal">
+<div class="bg-white w-full rounded-t-2xl sm:rounded-2xl p-5 shadow-2xl border border-slate-200 animate-in fade-in slide-in-from-bottom duration-200">
+<div class="flex items-center justify-between pb-3 border-b border-slate-100">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-rose-100 text-[#c8102e] flex items-center justify-center">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<h3 class="font-bold text-slate-900 text-sm">Cancel Broadcast</h3>
+</div>
+<button class="text-slate-400 hover:text-slate-600 p-1 rounded-full" onclick="document.getElementById('cancel-modal').classList.add('hidden')" type="button">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+</div>
+<div class="py-3.5 space-y-3">
+<p class="text-xs text-slate-600 leading-relaxed">
+            Cancelling will notify the 2 committed donors and stop broadcasting to nearby responders.
+          </p>
+<div>
+<label class="block text-xs font-semibold text-slate-700 mb-1">
+              Reason for cancellation <span class="text-slate-400 font-normal">(optional)</span>
+</label>
+<input class="w-full text-xs px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#c8102e]/20 focus:border-[#c8102e] text-slate-800 placeholder-slate-400 transition" placeholder="e.g., Hospital blood bank fulfilled, patient stabilized" type="text">
+</div>
+</div>
+<div class="flex items-center gap-2 pt-2">
+<button class="flex-1 py-2.5 px-3 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition" onclick="document.getElementById('cancel-modal').classList.add('hidden')" type="button">
+            Keep Request Active
+          </button>
+<button class="flex-1 py-2.5 px-3 rounded-xl bg-[#c8102e] hover:bg-[#a00c24] text-xs font-bold text-white transition shadow-sm" type="button">
+            Confirm Cancel
+          </button>
+</div>
+</div>
+</div>
+<!-- Standardized Bottom Navigation Bar (Matching Requestor Home & History) -->
+<nav class="fixed bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-6 py-2.5 flex items-center justify-around z-40 shadow-lg left-0 right-0">
+<!-- Requests Tab (Active) -->
+<a class="flex flex-col items-center gap-1 text-[#c8102e] transition group" href="#">
+<div class="relative">
+<svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+</svg>
+</div>
+<span class="text-[11px] font-bold tracking-tight whitespace-nowrap">Requests</span>
+</a>
+<!-- History Tab -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition group" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium tracking-tight whitespace-nowrap">History</span>
+</a>
+<!-- Profile Tab -->
+<a class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition group" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-[11px] font-medium tracking-tight whitespace-nowrap">Profile</span>
+</a>
+</nav>
+</div>
+
+
+
+</body></html>

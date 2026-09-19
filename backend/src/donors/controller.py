@@ -1,0 +1,150 @@
+from fastapi import BackgroundTasks, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
+
+from src.donors import dtos
+from src.donors.models import Donor
+from src.utils import accounts
+from src.utils.auth import get_current_entity
+from src.utils.cloudinary_utils import upload_image
+from src.utils.geo import make_point
+from src.utils.helpers import create_access_token, hash_password, verify_password
+
+ROLE = "donor"
+
+get_current_donor = get_current_entity(ROLE)
+
+
+def signup(data: dtos.DonorSignup, db: Session, background_tasks: BackgroundTasks) -> Donor:
+    if db.query(Donor).filter(Donor.email == data.email).first():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
+
+    donor = Donor(
+        full_name=data.full_name,
+        email=data.email,
+        phone=data.phone,
+        password_hash=hash_password(data.password),
+        blood_type=data.blood_type,
+    )
+    db.add(donor)
+    db.commit()
+    db.refresh(donor)
+
+    accounts.queue_verification_email(donor, ROLE, background_tasks)
+    return donor
+
+
+def verify_email(token: str, db: Session) -> None:
+    payload = accounts.decode_verification_token(token, ROLE)
+    donor = db.query(Donor).filter(Donor.id == payload.get("id")).first()
+    if not donor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Donor not found")
+    donor.is_email_verified = True
+    db.commit()
+
+
+def resend_verification(data: dtos.ForgotPasswordRequest, db: Session, background_tasks: BackgroundTasks) -> None:
+    donor = db.query(Donor).filter(Donor.email == data.email).first()
+    # Silent no-op for unknown or already-verified addresses, so this can't be
+    # used to enumerate registered emails.
+    if donor and not donor.is_email_verified:
+        accounts.queue_verification_email(donor, ROLE, background_tasks)
+
+
+def login(data: dtos.DonorLogin, db: Session) -> str:
+    donor = db.query(Donor).filter(Donor.email == data.email).first()
+    if not donor or not verify_password(data.password, donor.password_hash):
+        raise accounts.invalid_credentials()
+    accounts.assert_can_login(donor, require_verification=True)
+    return create_access_token({"id": str(donor.id), "role": ROLE})
+
+
+def update_location(donor: Donor, data: dtos.DonorUpdateLocation, db: Session) -> Donor:
+    donor.location = make_point(data.latitude, data.longitude)
+    donor.area_label = data.area_label
+    db.commit()
+    db.refresh(donor)
+    return donor
+
+
+def update_profile(donor: Donor, data: dtos.DonorUpdateProfile, db: Session) -> Donor:
+    for field, value in data.model_dump(exclude_unset=True).items():
+        # An explicit `null` would otherwise write NULL into a NOT NULL column
+        # and surface as a 500. Clearing these fields isn't supported.
+        if value is None:
+            continue
+        setattr(donor, field, value)
+    db.commit()
+    db.refresh(donor)
+    return donor
+
+
+def update_device_token(donor: Donor, data: dtos.DonorUpdateDeviceToken, db: Session) -> Donor:
+    """Register (or, with an explicit null, unregister) this donor's push token.
+
+    Unlike update_profile() a None is honoured rather than skipped: the column
+    is nullable, and clearing it is how the app says "stop notifying this
+    device" on logout.
+    """
+    donor.device_token = data.device_token
+    db.commit()
+    db.refresh(donor)
+    return donor
+
+
+def update_availability(donor: Donor, data: dtos.DonorUpdateAvailability, db: Session) -> Donor:
+    """Turn the donor's Available/Unavailable toggle on or off.
+
+    Unlike update_location(), this deliberately does NOT touch the stored
+    location. A donor who goes unavailable keeps their coordinates, so flipping
+    the toggle back on doesn't force a fresh GPS round-trip — they are simply
+    skipped by notification targeting and refused when accepting in the
+    meantime.
+    """
+    donor.is_available = data.is_available
+    db.commit()
+    db.refresh(donor)
+    return donor
+
+
+def upload_profile_pic(donor: Donor, file: UploadFile, db: Session) -> Donor:
+    donor.profile_pic_url = upload_image(file, folder="bloodbridge/donors")
+    db.commit()
+    db.refresh(donor)
+    return donor
+
+
+def remove_profile_pic(donor: Donor, db: Session) -> Donor:
+    donor.profile_pic_url = None
+    db.commit()
+    db.refresh(donor)
+    return donor
+
+
+def delete_account(donor: Donor, db: Session) -> None:
+    """Deactivate the donor while preserving historical commitments."""
+    donor.is_active = False
+    donor.full_name = "Deleted donor"
+    donor.email = f"deleted-{donor.id}@deleted.bloodbridge.local"
+    donor.phone = "Unavailable"
+    donor.password_hash = "account-deleted"
+    donor.profile_pic_url = None
+    donor.location = None
+    donor.area_label = None
+    donor.device_token = None
+    donor.is_available = False
+    db.commit()
+
+
+def forgot_password(data: dtos.ForgotPasswordRequest, db: Session, background_tasks: BackgroundTasks) -> None:
+    donor = db.query(Donor).filter(Donor.email == data.email).first()
+    if not donor:
+        return  # don't leak whether the email exists
+    accounts.queue_password_reset_email(donor, ROLE, background_tasks)
+
+
+def reset_password(data: dtos.ResetPasswordRequest, db: Session) -> None:
+    payload = accounts.decode_reset_token(data.token, ROLE)
+    donor = db.query(Donor).filter(Donor.id == payload.get("id")).first()
+    if not donor:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Donor not found")
+    accounts.apply_password_reset(donor, data.new_password, payload, db)

@@ -1,0 +1,308 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+    @layer base {
+      html, body {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #faf8ff;
+      }
+      body {
+        overscroll-behavior: none;
+      }
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      .pt-safe {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  </style>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#c8102e",
+            "primary-hover": "#a80d26",
+            "primary-light": "#FFF1F2",
+            "mint-bg": "#E6F7ED",
+            "mint-text": "#0D9488",
+            "background": "#faf8ff",
+            "surface": "#faf8ff",
+            "surface-card": "#ffffff",
+            "surface-soft": "#f4f5fa",
+            "on-surface": "#131b2e",
+            "on-surface-muted": "#64748b",
+            "border-soft": "#eef1f6",
+            "progress-track": "#f1f3f9"
+          },
+          fontFamily: {
+            sans: ["Inter", "sans-serif"]
+          },
+          borderRadius: {
+            "xl": "0.75rem",
+            "2xl": "1rem"
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-surface text-on-surface font-sans flex flex-col min-h-screen pt-safe select-none">
+<main class="flex-1 flex flex-col relative w-full items-center">
+<div class="flex flex-col w-full max-w-[390px] pb-48 px-4 pt-2">
+<!-- 1. TOP APP BAR -->
+<header class="flex items-center justify-between py-3 mb-2 sticky top-0 bg-surface/95 backdrop-blur-md z-30">
+<button aria-label="Back to Donor Home" class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface hover:bg-slate-200/50 active:scale-95 transition-all" type="button">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</button>
+<div class="flex flex-col items-center text-center">
+<h1 class="text-[17px] font-bold text-on-surface leading-tight">Request Details</h1>
+<span class="text-[11px] font-semibold text-primary uppercase tracking-wider">Emergency Dispatch</span>
+</div>
+
+<div class="w-10 h-10" aria-hidden="true"></div></header>
+<!-- 2. URGENCY BANNER -->
+<section class="rounded-2xl p-3.5 bg-[#FFF0F2] border border-[#FFE0E4] shadow-sm mb-3">
+<div class="flex items-center justify-between mb-1.5">
+<div class="flex items-center space-x-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-primary"></span>
+</span>
+<span class="text-[13px] tracking-wider uppercase text-primary font-extrabold">CRITICAL URGENCY</span>
+</div>
+<span class="text-[11px] font-semibold bg-white text-primary px-2.5 py-0.5 rounded-full shadow-sm border border-primary/10">
+      Dispatch Active
+    </span>
+</div>
+<div class="flex items-center space-x-1.5 text-primary text-[13px] font-semibold pl-0.5">
+<span class="material-symbols-outlined text-[17px]">schedule</span>
+<span class="">Needed within 3 hours</span>
+</div>
+</section>
+<!-- 3. HERO BLOOD NEED & TITLE -->
+<section class="bg-white rounded-2xl p-5 shadow-sm flex flex-col items-center text-center mb-3">
+<!-- Blood Avatar Circle -->
+<div class="w-20 h-20 rounded-full bg-red-50 border border-red-200 flex flex-col items-center justify-center mb-3">
+<span class="text-[32px] font-black text-primary leading-none">O-</span>
+<span class="text-[10px] text-primary tracking-widest font-bold mt-0.5 uppercase">NEEDED</span>
+</div>
+<!-- Verified Pill Badge -->
+<div class="inline-flex items-center space-x-1 bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-[12px] font-semibold mb-2.5">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="">Verified Request</span>
+</div>
+<!-- Request Title -->
+<h2 class="text-[19px] font-bold text-on-surface tracking-tight">Emergency Trauma Request</h2>
+</section>
+<!-- 4. REAL MAP VIEW CARD -->
+<section class="relative rounded-2xl overflow-hidden shadow-sm bg-[#e9edf2] h-44 mb-3 border border-slate-100">
+<svg class="w-full h-full object-cover" fill="none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 360 176" xmlns="http://www.w3.org/2000/svg">
+<rect fill="#F4F5F7" height="176" width="360"></rect>
+<path d="M-10 100 C 20 85, 45 95, 65 120 C 80 140, 60 180, 20 185 Z" fill="#E2F2E9"></path>
+<path d="M260 -10 C 290 10, 310 25, 340 15 C 370 5, 380 40, 350 60 C 310 70, 280 40, 260 -10 Z" fill="#E2F2E9"></path>
+<rect fill="#FFFFFF" height="34" rx="4" stroke="#E2E6EE" stroke-width="1" width="50" x="75" y="18"></rect>
+<rect fill="#FFFFFF" height="36" rx="4" stroke="#E2E6EE" stroke-width="1" width="60" x="135" y="16"></rect>
+<rect fill="#FFFFFF" height="38" rx="4" stroke="#E2E6EE" stroke-width="1" width="55" x="205" y="14"></rect>
+<rect fill="#FFFFFF" height="42" rx="4" stroke="#E2E6EE" stroke-width="1" width="55" x="70" y="62"></rect>
+<rect fill="#FFFFFF" height="42" rx="4" stroke="#E2E6EE" stroke-width="1" width="70" x="135" y="62"></rect>
+<rect fill="#FFFFFF" height="45" rx="4" stroke="#E2E6EE" stroke-width="1" width="55" x="70" y="114"></rect>
+<rect fill="#FFFFFF" height="45" rx="4" stroke="#E2E6EE" stroke-width="1" width="70" x="135" y="114"></rect>
+<rect fill="#FFFFFF" height="48" rx="4" stroke="#E2E6EE" stroke-width="1" width="60" x="215" y="112"></rect>
+<line stroke="#FFFFFF" stroke-width="6" x1="60" x2="60" y1="10" y2="170"></line>
+<line stroke="#FFFFFF" stroke-width="6" x1="130" x2="130" y1="0" y2="180"></line>
+<line stroke="#FFFFFF" stroke-width="6" x1="210" x2="210" y1="0" y2="180"></line>
+<line stroke="#FFFFFF" stroke-width="6" x1="70" x2="270" y1="56" y2="56"></line>
+<line stroke="#FFFFFF" stroke-width="6" x1="70" x2="280" y1="108" y2="108"></line>
+<path d="M-10 40 Q 90 44 190 28 T 370 2" fill="none" stroke="#B8E1FF" stroke-width="7"></path>
+<path d="M-10 48 Q 90 52 190 36 T 370 10" fill="none" stroke="#FFFFFF" stroke-width="5"></path>
+<text fill="#0284C7" font-family="Inter" font-size="8" font-weight="600" letter-spacing="0.5" x="18" y="36">CANAL ROAD</text>
+<path d="M30 185 L 310 -5" fill="none" stroke="#FFFFFF" stroke-width="12"></path>
+<path d="M30 185 L 310 -5" fill="none" stroke="#FEE2E2" stroke-dasharray="8 4" stroke-width="4"></path>
+<g transform="translate(195, 80) rotate(-34)">
+<text fill="#94A3B8" font-family="Inter" font-size="7.5" font-weight="700" letter-spacing="0.4" x="0" y="0">KHAYABAN-E-FIRDOUSI</text>
+</g>
+<text fill="#94A3B8" font-family="Inter" font-size="9" font-weight="700" opacity="0.6" x="145" y="86">BLOCK G</text>
+<text fill="#94A3B8" font-family="Inter" font-size="9" font-weight="700" opacity="0.6" x="80" y="86">BLOCK F</text>
+<text fill="#94A3B8" font-family="Inter" font-size="9" font-weight="700" opacity="0.6" x="145" y="138">BLOCK H</text>
+<!-- Request Location Marker -->
+<g transform="translate(162, 82)">
+<circle cx="0" cy="0" fill="#C8102E" opacity="0.2" r="16"></circle>
+<circle cx="0" cy="0" fill="#C8102E" opacity="0.3" r="8"></circle>
+<path d="M0 2 C -5.5 2 -10 -2.5 -10 -8 C -10 -15 0 -26 0 -26 C 0 -26 10 -15 10 -8 C 10 -2.5 5.5 2 0 2 Z" fill="#C8102E" filter="drop-shadow(0px 2px 3px rgba(0,0,0,0.25))"></path>
+<circle cx="0" cy="-8" fill="#FFFFFF" r="3.5"></circle>
+<g transform="translate(14, -18)">
+<rect fill="#131B2E" height="18" opacity="0.95" rx="9" width="70" x="0" y="-8"></rect>
+<text fill="#FFFFFF" font-family="Inter" font-size="9.5" font-weight="600" text-anchor="middle" x="35" y="4">Johar Town</text>
+</g>
+</g>
+</svg>
+<!-- Top-Right: Directions Button -->
+<button aria-label="Get Directions" class="absolute top-2.5 right-2.5 flex items-center space-x-1.5 bg-white/95 backdrop-blur-sm text-on-surface px-3 py-1.5 rounded-lg shadow-sm border border-slate-200/60 active:scale-95 transition-transform" type="button">
+<svg class="w-3.5 h-3.5 text-primary fill-current" viewBox="0 0 24 24">
+<path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z"></path>
+</svg>
+<span class="text-[12px] font-bold">Directions</span>
+</button>
+<!-- Bottom Overlay: Navigation Badge -->
+<div class="absolute bottom-2.5 left-2.5">
+<div class="inline-flex items-center space-x-1.5 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-slate-200/60 text-on-surface">
+<span class="material-symbols-outlined text-[15px] text-primary">pin_drop</span>
+<span class="text-[12px] font-semibold">Approx. 1.8 km away</span>
+</div>
+</div>
+</section>
+<!-- 5. UNITS PROGRESS SECTION -->
+<section class="bg-white rounded-2xl p-4 shadow-sm mb-3">
+<div class="flex items-center justify-between mb-2">
+<span class="text-[14px] text-on-surface-muted font-medium">Units Target</span>
+<span class="text-[14px] text-on-surface font-bold">2 of 4 units secured</span>
+</div>
+<!-- Progress Bar (50%) -->
+<div class="w-full h-2.5 bg-red-100/50 rounded-full overflow-hidden mb-2">
+<div class="h-full bg-primary rounded-full" style="width: 50%;"></div>
+</div>
+<div class="flex items-center justify-between text-[12px]">
+<div class="flex items-center space-x-1 text-primary font-semibold">
+<span class="material-symbols-outlined text-[15px]">warning</span>
+<span class="">2 more donors needed immediately</span>
+</div>
+<span class="text-on-surface-muted font-medium">50% Complete</span>
+</div>
+</section>
+<!-- 6. LOGISTICS & TIMING SECTION -->
+<section class="bg-white rounded-2xl p-4 shadow-sm mb-3">
+<h3 class="text-[14px] font-bold text-on-surface mb-3.5">Logistics &amp; Timing</h3>
+<div class="space-y-3.5">
+<!-- Row 1: Location -->
+<div class="flex items-start space-x-3">
+<div class="w-9 h-9 rounded-full bg-surface-soft flex items-center justify-center shrink-0 text-on-surface-muted">
+<span class="material-symbols-outlined text-[19px]">location_on</span>
+</div>
+<div class="flex-1 min-w-0 pt-0.5">
+<p class="text-[14px] font-semibold text-on-surface leading-snug">Johar Town — 1.8 km away</p>
+<p class="text-[12px] text-on-surface-muted mt-0.5">Lahore Metro Area • Approx. radius only</p>
+</div>
+</div>
+<!-- Row 2: Timing -->
+<div class="flex items-start space-x-3">
+<div class="w-9 h-9 rounded-full bg-surface-soft flex items-center justify-center shrink-0 text-on-surface-muted">
+<span class="material-symbols-outlined text-[19px]">schedule</span>
+</div>
+<div class="flex-1 min-w-0 pt-0.5">
+<p class="text-[14px] font-semibold text-on-surface leading-snug">Required by Today, 5:30 PM</p>
+<p class="text-[12px] text-on-surface-muted mt-0.5">Critical 3-hour transfusion window</p>
+</div>
+</div>
+<!-- Row 3: Posted -->
+<div class="flex items-start space-x-3">
+<div class="w-9 h-9 rounded-full bg-surface-soft flex items-center justify-center shrink-0 text-on-surface-muted">
+<span class="material-symbols-outlined text-[19px]">history</span>
+</div>
+<div class="flex-1 min-w-0 pt-0.5">
+<p class="text-[14px] font-semibold text-on-surface leading-snug">Posted 25 minutes ago</p>
+<p class="text-[12px] text-on-surface-muted mt-0.5">Request created</p>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. REASSURANCE BOX -->
+<section class="bg-[#f8faff] rounded-2xl p-3.5 border border-[#e4ecfb] shadow-sm flex items-start space-x-3 mb-3">
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 text-primary shadow-sm mt-0.5">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-[13px] font-semibold text-on-surface leading-tight">
+      Contact details will be shared once you accept.
+    </p>
+<p class="text-[11px] text-on-surface-muted mt-1 leading-relaxed">
+      Protecting patient and coordinator privacy until donor commitment is confirmed.
+    </p>
+</div>
+</section>
+<!-- 8. DONOR PRE-SCREENING -->
+<section class="bg-white rounded-2xl p-4 shadow-sm">
+<h3 class="text-[14px] font-bold text-on-surface mb-2.5">Donor Pre-Screening</h3>
+<div class="flex items-center space-x-2 text-emerald-600">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-[13px] font-medium text-on-surface">You are a compatible O- donor</span>
+</div>
+</section>
+</div>
+<!-- 9. COMMITMENT CTA (FIXED ABOVE TAB BAR) -->
+<div class="fixed bottom-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-100 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
+<div class="max-w-[390px] mx-auto px-4 py-3">
+<button class="w-full bg-[#c8102e] hover:bg-[#a80d26] text-white font-semibold py-3.5 rounded-xl active:scale-[0.99] text-[15px] flex items-center justify-center space-x-2 shadow-sm transition-all" id="acceptDispatchBtn" type="button">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">bloodtype</span>
+<span class="">Accept &amp; Donate</span>
+</button>
+<p class="text-[11px] text-center text-on-surface-muted mt-2 leading-tight">
+      By accepting, you commit to arriving within the specified window.
+    </p>
+</div>
+</div>
+<!-- 10. BOTTOM NAVIGATION TAB BAR -->
+<nav class="fixed bottom-0 left-0 right-0 z-50 h-14 bg-white border-t border-slate-100 flex items-center justify-around max-w-[390px] mx-auto px-2 pb-safe">
+<button class="flex flex-col items-center justify-center flex-1 py-1 text-[#c8102e] active:scale-95 transition-transform" type="button">
+<svg class="w-6 h-6" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" viewBox="0 0 24 24">
+<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" fill="currentColor"></path>
+</svg>
+<span class="text-[11px] font-semibold mt-1 tracking-normal leading-none whitespace-nowrap">Requests</span>
+</button>
+<button class="flex flex-col items-center justify-center flex-1 py-1 text-[#6b7280] hover:text-on-surface active:scale-95 transition-all" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<circle cx="12" cy="12" r="10"></circle>
+<polyline points="12 6 12 12 16 14"></polyline>
+</svg>
+<span class="text-[11px] font-semibold mt-1 tracking-normal leading-none text-[#6b7280] whitespace-nowrap">History</span>
+</button>
+<button class="flex flex-col items-center justify-center flex-1 py-1 text-[#6b7280] hover:text-on-surface active:scale-95 transition-all" type="button">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+<circle cx="12" cy="7" r="4"></circle>
+</svg>
+<span class="text-[11px] font-semibold mt-1 tracking-normal leading-none text-[#6b7280] whitespace-nowrap">Profile</span>
+</button>
+</nav>
+</main>
+<script>
+  (function() {
+    const acceptBtn = document.getElementById('acceptDispatchBtn');
+    if (acceptBtn) {
+      acceptBtn.addEventListener('click', function() {
+        acceptBtn.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Confirming Dispatch...</span>
+        `;
+        acceptBtn.setAttribute('disabled', 'true');
+        setTimeout(function() {
+          acceptBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[19px]">task_alt</span>
+            <span>Dispatch Accepted!</span>
+          `;
+          acceptBtn.classList.remove('bg-[#c8102e]', 'hover:bg-[#a80d26]');
+          acceptBtn.classList.add('bg-emerald-600');
+        }, 1000);
+      });
+    }
+  })();
+</script>
+
+
+
+
+</body></html>
