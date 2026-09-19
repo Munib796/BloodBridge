@@ -9,6 +9,7 @@
 *.jks
 *.keystore
 *.mobileprovision
+google-services.json
 
 # Python backend
 __pycache__/
