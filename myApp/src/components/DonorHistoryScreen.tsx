@@ -23,6 +23,7 @@ import { donorHistoryStyles as styles } from "../styles/donorHistoryStyles";
 import type { MatchStatus, RequestMatchDetail, RequestStatus, UrgencyLevel } from "../lib/apiTypes";
 import { describeApiFailure, type ApiFailure } from "../lib/errors";
 import { formatAbsoluteTime, formatArrivalIn, formatDate, formatDistanceKm, formatTimeAgo } from "../lib/format";
+import { dialablePakistaniPhone, formatPakistaniPhone } from "../lib/phone";
 import {
   cancelMatch,
   completeMatch,
@@ -245,7 +246,7 @@ function PastRecord({ match }: { match: RequestMatchDetail }) {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Call ${match.poster_name ?? "coordinator"}`}
-          onPress={() => Linking.openURL(`tel:${match.poster_phone}`)}
+          onPress={() => Linking.openURL(`tel:${dialablePakistaniPhone(match.poster_phone)}`)}
           style={styles.pastCallButton}
         >
           <MaterialIcons name="call" size={15} color={colors.crimson} />
@@ -294,6 +295,7 @@ function LiveCommitment({
   const request = match.blood_request;
   const appearance = URGENCY_APPEARANCE[request.urgency_level];
   const hospital = hospitalOf(match);
+  const posterPhone = formatPakistaniPhone(match.poster_phone);
 
   return (
     <View style={styles.card}>
@@ -351,8 +353,8 @@ function LiveCommitment({
       <View style={styles.actionRow}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Call ${match.poster_phone}`}
-          onPress={() => Linking.openURL(`tel:${match.poster_phone}`)}
+          accessibilityLabel={`Call ${posterPhone}`}
+          onPress={() => Linking.openURL(`tel:${dialablePakistaniPhone(match.poster_phone)}`)}
           style={styles.callButton}
         >
           <MaterialIcons name="call" size={17} color={colors.surface} />

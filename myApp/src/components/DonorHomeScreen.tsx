@@ -252,7 +252,6 @@ export default function DonorHomeScreen() {
         <View style={styles.bottomBar}>
           <Pressable style={styles.tab}><MaterialIcons name="water-drop" size={23} color={colors.crimson} /><Text style={[styles.tabLabel, styles.activeTabLabel]}>Requests</Text></Pressable>
           <Pressable onPress={() => router.push("/history" as RelativePathString)} style={styles.tab}><MaterialIcons name="history" size={23} color="#6b7280" /><Text style={styles.tabLabel}>History</Text></Pressable>
-          <Pressable onPress={() => router.push("/messages" as RelativePathString)} style={styles.tab}><MaterialIcons name="chat-bubble-outline" size={23} color="#6b7280" /><Text style={styles.tabLabel}>Messages</Text></Pressable>
           <Pressable onPress={() => router.push("/profile" as RelativePathString)} style={styles.tab}><MaterialIcons name="person-outline" size={23} color="#6b7280" /><Text style={styles.tabLabel}>Profile</Text></Pressable>
         </View>
       </View>

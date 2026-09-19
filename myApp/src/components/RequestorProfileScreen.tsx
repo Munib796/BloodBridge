@@ -15,6 +15,7 @@ import ProfilePictureActionModal from "./ProfilePictureActionModal";
 import { useAuth } from "../context/AuthContext";
 import { fieldErrorsFrom } from "../lib/apiClient";
 import { describeWriteError } from "../lib/errors";
+import { formatPakistaniPhone } from "../lib/phone";
 import {
   initialsFrom,
   deleteAccount,
@@ -90,7 +91,7 @@ export default function RequestorProfileScreen() {
 
   const fields: ProfileField[] = [
     { icon: "mail", label: "Email Address", value: email || "—", action: "Edit", editable: false },
-    { icon: "call", label: "Phone Number", value: profile?.phone ?? "—", action: "Edit", editable: true },
+    { icon: "call", label: "Phone Number", value: profile?.phone ? formatPakistaniPhone(profile.phone) : "—", action: "Edit", editable: true },
   ];
 
   /** See the donor screen for why the slot is shared and when the sheet closes. */

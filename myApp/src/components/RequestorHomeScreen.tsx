@@ -351,13 +351,6 @@ export default function RequestorHomeScreen() {
             <Text style={styles.tabText}>History</Text>
           </Pressable>
           <Pressable
-            onPress={() => router.push("/messages" as RelativePathString)}
-            style={styles.tab}
-          >
-            <MaterialIcons name="chat-bubble-outline" size={22} color="#6b7280" />
-            <Text style={styles.tabText}>Messages</Text>
-          </Pressable>
-          <Pressable
             onPress={() => router.push("/requestor/profile" as RelativePathString)}
             style={styles.tab}
           >

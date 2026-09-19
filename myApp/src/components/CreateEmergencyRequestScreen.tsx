@@ -9,6 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ApiError, fieldErrorsFrom } from "../lib/apiClient";
 import { createBloodRequest } from "../lib/bloodRequests";
 import { formatAbsoluteTime } from "../lib/format";
+import { composePakistaniPhone, isValidPakistaniPhone, phoneInputDigits, PAKISTAN_COUNTRY_CODE } from "../lib/phone";
 import { useAuth } from "../context/AuthContext";
 import { colors } from "../theme/colors";
 import { createEmergencyRequestStyles as styles } from "../styles/createEmergencyRequestStyles";
@@ -19,8 +20,6 @@ type Coordinates = { latitude: number; longitude: number } | null;
 
 /** Mirrors the backend's Name/Label/Phone bounds — src/utils/validators.py. */
 const MAX_NAME_LENGTH = 120;
-const MIN_PHONE_LENGTH = 7;
-const MAX_PHONE_LENGTH = 20;
 
 const bloodTypes = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
 const urgencyOptions: { key: UrgencyLevel; label: string; color: string; selectedTint: string; textColor: string }[] = [
@@ -44,13 +43,6 @@ const DAY_MS = 86_400_000;
 
 function formatCoordinate(value: number, positiveDirection: "N" | "E", negativeDirection: "S" | "W") {
   return `${Math.abs(value).toFixed(4)}° ${value >= 0 ? positiveDirection : negativeDirection}`;
-}
-
-function splitPhone(phone: string) {
-  const normalizedPhone = phone.trim();
-  return normalizedPhone.startsWith("+92")
-    ? { countryCode: "+92", number: normalizedPhone.slice(3).trim() }
-    : { countryCode: "+92", number: normalizedPhone };
 }
 
 function startOfDay(date: Date): Date {
@@ -80,9 +72,8 @@ export default function CreateEmergencyRequestScreen() {
   const [selectedBloodType, setSelectedBloodType] = useState("O+");
   const [selectedUrgency, setSelectedUrgency] = useState<UrgencyLevel>("critical");
   const [units, setUnits] = useState(1);
-  const initialContactPhone = state.status === "signedIn" && state.role === "requestor" ? splitPhone(state.profile.phone) : { countryCode: "+92", number: "" };
-  const [contactCountryCode, setContactCountryCode] = useState(initialContactPhone.countryCode);
-  const [contactPhone, setContactPhone] = useState(initialContactPhone.number);
+  const initialContactPhone = state.status === "signedIn" && state.role === "requestor" ? phoneInputDigits(state.profile.phone) : "";
+  const [contactPhone, setContactPhone] = useState(initialContactPhone);
   const [focusedPhoneInput, setFocusedPhoneInput] = useState<"country" | "number" | null>(null);
   const [pulse] = useState(() => new Animated.Value(0));
   const [location, setLocation] = useState<Coordinates>(null);
@@ -140,7 +131,7 @@ export default function CreateEmergencyRequestScreen() {
 
   /** What would be sent if the button were pressed now. */
   function composePhone(): string {
-    return `${contactCountryCode.trim()} ${contactPhone.trim()}`.trim();
+    return composePakistaniPhone(contactPhone);
   }
 
   /** Local checks, so an obviously incomplete form costs no round trip. */
@@ -153,11 +144,7 @@ export default function CreateEmergencyRequestScreen() {
     }
 
     const phone = composePhone();
-    if (phone.replace(/\D/g, "").length < MIN_PHONE_LENGTH) {
-      errors.contact_phone = "Enter a full contact number.";
-    } else if (phone.length > MAX_PHONE_LENGTH) {
-      errors.contact_phone = `Keep this under ${MAX_PHONE_LENGTH} characters.`;
-    }
+    if (!isValidPakistaniPhone(phone)) errors.contact_phone = "Enter 10 digits starting with 3.";
 
     return errors;
   }
@@ -465,16 +452,17 @@ export default function CreateEmergencyRequestScreen() {
                   accessibilityLabel="Contact country code"
                   keyboardType="phone-pad"
                   onBlur={() => setFocusedPhoneInput(null)}
-                  onChangeText={(value) => { setContactCountryCode(value); clearFieldError("contact_phone"); }}
+                  editable={false}
                   onFocus={() => setFocusedPhoneInput("country")}
                   style={[styles.countryCode, focusedPhoneInput === "country" && styles.inputFocused]}
-                  value={contactCountryCode}
+                  value={PAKISTAN_COUNTRY_CODE}
                 />
                 <TextInput
                   accessibilityLabel="Contact phone number"
                   keyboardType="phone-pad"
                   onBlur={() => setFocusedPhoneInput(null)}
-                  onChangeText={(value) => { setContactPhone(value); clearFieldError("contact_phone"); }}
+                  maxLength={10}
+                  onChangeText={(value) => { setContactPhone(phoneInputDigits(value)); clearFieldError("contact_phone"); }}
                   onFocus={() => setFocusedPhoneInput("number")}
                   returnKeyType="done"
                   style={[styles.numberInput, focusedPhoneInput === "number" && styles.inputFocused, fieldErrors.contact_phone ? styles.inputShellError : null]}

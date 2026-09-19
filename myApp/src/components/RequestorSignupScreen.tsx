@@ -6,11 +6,11 @@ import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ApiError, api, fieldErrorsFrom } from "../lib/apiClient";
+import { composePakistaniPhone, isValidPakistaniPhone, phoneInputDigits } from "../lib/phone";
 import { resendErrorMessage, resendVerificationEmail } from "../lib/verification";
 import { requestorSignupStyles as styles } from "../styles/requestorSignupStyles";
 import BrandLogo from "./BrandLogo";
 
-const COUNTRY_CODE = "+92";
 
 /** Mirrors the backend's RequestorSignup DTO — src/requestors/dtos.py. */
 type RequestorSignupPayload = {
@@ -24,17 +24,6 @@ type RequestorSignupPayload = {
  * The phone row shows a fixed +92 selector beside a national-number box, but
  * the backend wants a single string, so the two are joined here.
  */
-function composePhone(national: string): string {
-  const cleaned = national.replace(/[\s()\-.]/g, "");
-  if (!cleaned) return "";
-  // Already typed in full international form — leave it as it is.
-  if (cleaned.startsWith("+")) return cleaned;
-  // Local convention writes a leading zero (0300 1234567); the +92 form drops
-  // it, and without this "03001234567" would become "+9203001234567".
-  const withoutTrunkZero = cleaned.startsWith("0") ? cleaned.slice(1) : cleaned;
-  return `${COUNTRY_CODE}${withoutTrunkZero}`;
-}
-
 type InputFieldProps = {
   icon: "person-outline" | "mail-outline";
   label: string;
@@ -159,7 +148,7 @@ export default function RequestorSignupScreen() {
     const errors: Record<string, string> = {};
     if (!fullName.trim()) errors.full_name = "Enter your full name.";
     if (!email.trim()) errors.email = "Enter your email address.";
-    if (!phone.trim()) errors.phone = "Enter your phone number.";
+    if (!isValidPakistaniPhone(phone)) errors.phone = "Enter 10 digits starting with 3.";
     if (!password) errors.password = "Choose a password.";
     return errors;
   }
@@ -176,7 +165,7 @@ export default function RequestorSignupScreen() {
       const payload: RequestorSignupPayload = {
         full_name: fullName.trim(),
         email: email.trim(),
-        phone: composePhone(phone),
+        phone: composePakistaniPhone(phone),
         password,
       };
 
@@ -317,8 +306,9 @@ export default function RequestorSignupScreen() {
                   <View style={styles.countrySelector}><Text style={styles.countryLabel}>PK</Text><Text style={styles.countryCode}>+92</Text></View>
                   <TextInput
                     keyboardType="phone-pad"
-                    onChangeText={(value) => { setPhone(value); clearFieldError("phone"); }}
-                    placeholder="300 1234567"
+                    maxLength={10}
+                    onChangeText={(value) => { setPhone(phoneInputDigits(value)); clearFieldError("phone"); }}
+                    placeholder="3XXXXXXXXX"
                     placeholderTextColor="#94a3b8"
                     style={[styles.phoneInput, fieldErrors.phone ? styles.inputShellError : null]}
                     value={phone}

@@ -73,8 +73,7 @@ MIN_UNITS = 1
 MAX_UNITS = 20
 
 MAX_NAME_LENGTH = 120
-MIN_PHONE_LENGTH = 7
-MAX_PHONE_LENGTH = 20
+PAKISTAN_MOBILE_DIGITS = 10
 MAX_ADDRESS_LENGTH = 300
 MAX_CHAT_MESSAGE_LENGTH = 2000
 # Push tokens are opaque to us; the bound is a sanity check on what a client

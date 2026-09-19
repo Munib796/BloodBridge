@@ -30,6 +30,7 @@ import {
 import { describeApiFailure, describeWriteError } from "../lib/errors";
 import { initialsFrom } from "../lib/profile";
 import { formatAbsoluteTime, formatArrivalIn, formatTimeAgo } from "../lib/format";
+import { dialablePakistaniPhone, formatPakistaniPhone } from "../lib/phone";
 import {
   OUTCOME_BY_STATUS,
   REQUEST_STATUS_LABELS,
@@ -161,6 +162,7 @@ function CommitmentCard({
 }) {
   const router = useRouter();
   const name = match.acceptor_name ?? "Donor";
+  const acceptorPhone = match.acceptor_phone ? formatPakistaniPhone(match.acceptor_phone) : null;
 
   return (
     <View style={styles.donorCard}>
@@ -188,11 +190,11 @@ function CommitmentCard({
           {/* Omitted rather than dialling nothing: acceptor_phone is nullable on
               the wire, and an organization without one would otherwise open a
               tel: link to the empty string. */}
-          {match.acceptor_phone ? (
+          {acceptorPhone ? (
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Call ${name} on ${match.acceptor_phone}`}
-              onPress={() => Linking.openURL(`tel:${match.acceptor_phone}`)}
+              accessibilityLabel={`Call ${name} on ${acceptorPhone}`}
+              onPress={() => Linking.openURL(`tel:${dialablePakistaniPhone(match.acceptor_phone as string)}`)}
               style={styles.contactButton}
             >
               <MaterialIcons name="call" size={14} color={colors.mutedText} />
@@ -582,9 +584,10 @@ export default function RequestorRequestDetailScreen() {
                     <View style={[styles.fill, { width: `${percent}%` }]} />
                   </View>
                   <View style={styles.progressFooter}>
-                    <Text style={styles.moreNeeded}>
-                      <MaterialIcons name="error-outline" size={13} color={colors.amberText} /> {unitsFootnote(request)}
-                    </Text>
+                    <View style={styles.moreNeededWrap}>
+                      <MaterialIcons name="error-outline" size={13} color={colors.amberText} style={styles.moreNeededIcon} />
+                      <Text style={styles.moreNeeded}>{unitsFootnote(request)}</Text>
+                    </View>
                     <Text style={styles.percent}>{percent}% completed</Text>
                   </View>
                 </View>

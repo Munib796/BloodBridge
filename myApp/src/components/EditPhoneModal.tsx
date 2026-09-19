@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ActivityIndicator, KeyboardAvoidingView, Modal, Platform, Pressable, Text, TextInput, View } from "react-native";
 
 import { editPhoneModalStyles as styles } from "../styles/editPhoneModalStyles";
+import { composePakistaniPhone, isValidPakistaniPhone, phoneInputDigits, PAKISTAN_COUNTRY_CODE } from "../lib/phone";
 import { colors } from "../theme/colors";
 
 type EditPhoneModalProps = {
@@ -18,26 +19,13 @@ type EditPhoneModalProps = {
   error: string | null;
 };
 
-const defaultCountryCode = "+92";
-
-function splitPhone(phone: string) {
-  const normalizedPhone = phone.trim();
-  return normalizedPhone.startsWith(defaultCountryCode)
-    ? { countryCode: defaultCountryCode, number: normalizedPhone.slice(defaultCountryCode.length).trim() }
-    : { countryCode: defaultCountryCode, number: normalizedPhone };
-}
-
 export default function EditPhoneModal({ visible, currentPhone, onClose, onSave, isSubmitting, fieldErrors, error }: EditPhoneModalProps) {
-  const initialPhone = splitPhone(currentPhone);
-  const [countryCode, setCountryCode] = useState(initialPhone.countryCode);
-  const [phoneNumber, setPhoneNumber] = useState(initialPhone.number);
+  const [phoneNumber, setPhoneNumber] = useState(phoneInputDigits(currentPhone));
   const [focusedInput, setFocusedInput] = useState<"country" | "number" | null>(null);
 
   const close = () => {
     if (isSubmitting) return;
-    const phone = splitPhone(currentPhone);
-    setCountryCode(phone.countryCode);
-    setPhoneNumber(phone.number);
+    setPhoneNumber(phoneInputDigits(currentPhone));
     setFocusedInput(null);
     onClose();
   };
@@ -45,19 +33,13 @@ export default function EditPhoneModal({ visible, currentPhone, onClose, onSave,
   // The parent closes on success; see the note in EditNameModal.
   const save = () => {
     if (isSubmitting) return;
-    const cleanCountryCode = countryCode.trim();
-    const cleanPhoneNumber = phoneNumber.trim();
-    if (cleanCountryCode && cleanPhoneNumber) {
-      onSave(`${cleanCountryCode} ${cleanPhoneNumber}`);
+    if (isValidPakistaniPhone(phoneNumber)) {
+      onSave(composePakistaniPhone(phoneNumber));
     }
   };
 
-  const phoneError = fieldErrors.phone;
-  // Mirrors the backend's Phone bounds, so an obviously-short number is caught
-  // here rather than coming back as a 422 — src/utils/validators.py.
-  const composedLength = `${countryCode.trim()} ${phoneNumber.trim()}`.trim().length;
-  const canSave =
-    countryCode.trim().length > 0 && phoneNumber.trim().length > 0 && composedLength >= 7 && composedLength <= 20 && !isSubmitting;
+  const phoneError = fieldErrors.phone ?? (phoneNumber && !isValidPakistaniPhone(phoneNumber) ? "Enter 10 digits starting with 3." : undefined);
+  const canSave = isValidPakistaniPhone(phoneNumber) && !isSubmitting;
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={close}>
@@ -76,20 +58,18 @@ export default function EditPhoneModal({ visible, currentPhone, onClose, onSave,
             <View style={styles.phoneFields}>
               <TextInput
                 accessibilityLabel="Country code"
-                editable={!isSubmitting}
-                keyboardType="phone-pad"
-                onBlur={() => setFocusedInput(null)}
-                onChangeText={setCountryCode}
+                editable={false}
                 onFocus={() => setFocusedInput("country")}
                 style={[styles.countryCode, focusedInput === "country" && styles.inputFocused, phoneError ? styles.inputError : null]}
-                value={countryCode}
+                value={PAKISTAN_COUNTRY_CODE}
               />
               <TextInput
                 accessibilityLabel="Phone number"
                 editable={!isSubmitting}
                 keyboardType="phone-pad"
                 onBlur={() => setFocusedInput(null)}
-                onChangeText={setPhoneNumber}
+                maxLength={10}
+                onChangeText={(value) => setPhoneNumber(phoneInputDigits(value))}
                 onFocus={() => setFocusedInput("number")}
                 returnKeyType="done"
                 style={[styles.numberInput, focusedInput === "number" && styles.inputFocused, phoneError ? styles.inputError : null]}

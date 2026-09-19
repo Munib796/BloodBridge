@@ -17,6 +17,7 @@ import { fieldErrorsFrom } from "../lib/apiClient";
 import { availabilityErrorMessage, setDonorAvailability } from "../lib/donors";
 import { describeWriteError } from "../lib/errors";
 import { formatDate } from "../lib/format";
+import { formatPakistaniPhone } from "../lib/phone";
 import {
   initialsFrom,
   deleteAccount,
@@ -87,7 +88,7 @@ export default function DonorProfileScreen() {
   const profile = state.status === "signedIn" && state.role === "donor" ? state.profile : null;
 
   const fullName = profile?.full_name ?? "—";
-  const phone = profile?.phone ?? "—";
+  const phone = profile?.phone ? formatPakistaniPhone(profile.phone) : "—";
   const email = profile?.email ?? "";
   const available = profile?.is_available ?? false;
 

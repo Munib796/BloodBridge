@@ -2,6 +2,7 @@
 instead of being restated (or forgotten) in every module's DTOs."""
 
 from datetime import datetime, timezone
+import re
 from typing import Annotated
 
 from pydantic import AfterValidator, Field
@@ -11,10 +12,9 @@ from src.utils.constants import (
     MAX_DEVICE_TOKEN_LENGTH,
     MAX_NAME_LENGTH,
     MAX_PASSWORD_LENGTH,
-    MAX_PHONE_LENGTH,
     MAX_UNITS,
     MIN_PASSWORD_LENGTH,
-    MIN_PHONE_LENGTH,
+    PAKISTAN_MOBILE_DIGITS,
     MIN_UNITS,
 )
 
@@ -48,6 +48,16 @@ def _strip(value: str) -> str:
     return stripped
 
 
+def _normalize_pakistani_phone(value: str) -> str:
+    stripped = value.strip()
+    if not re.fullmatch(r"\+92\s*3\d{9}", stripped):
+        raise ValueError("Phone must use +92 followed by 10 digits beginning with 3")
+    digits = re.sub(r"\D", "", stripped)[2:]
+    if len(digits) != PAKISTAN_MOBILE_DIGITS:
+        raise ValueError("Phone must contain exactly 10 mobile digits")
+    return f"+92 {digits}"
+
+
 Password = Annotated[str, AfterValidator(_check_password_strength)]
 FutureDatetime = Annotated[datetime, AfterValidator(_must_be_future)]
 
@@ -57,7 +67,7 @@ Longitude = Annotated[float, Field(ge=-180, le=180)]
 Units = Annotated[int, Field(ge=MIN_UNITS, le=MAX_UNITS)]
 
 Name = Annotated[str, Field(min_length=1, max_length=MAX_NAME_LENGTH), AfterValidator(_strip)]
-Phone = Annotated[str, Field(min_length=MIN_PHONE_LENGTH, max_length=MAX_PHONE_LENGTH), AfterValidator(_strip)]
+Phone = Annotated[str, AfterValidator(_normalize_pakistani_phone)]
 Address = Annotated[str, Field(min_length=1, max_length=MAX_ADDRESS_LENGTH), AfterValidator(_strip)]
 Label = Annotated[str, Field(min_length=1, max_length=MAX_NAME_LENGTH), AfterValidator(_strip)]
 DeviceToken = Annotated[

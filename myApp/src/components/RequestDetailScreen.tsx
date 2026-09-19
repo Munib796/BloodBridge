@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { ActivityIndicator, Animated, Pressable, ScrollView, Text, View, type TextStyle, type ViewStyle } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import BrandLogo from "./BrandLogo";
 import RequestConfirmationModal from "./RequestConfirmationModal";
 import { useAuth } from "../context/AuthContext";
 import type { BloodRequest, RequestMatchDetail, UrgencyLevel } from "../lib/apiTypes";
@@ -462,7 +463,7 @@ export default function RequestDetailScreen() {
         {request && appearance ? (
           <View style={styles.bottomAction}>
             <Pressable onPress={() => setModalVisible(true)} style={styles.acceptButton}>
-              <MaterialIcons name="bloodtype" size={20} color={colors.surface} />
+              <BrandLogo size={22} />
               <Text style={styles.acceptText}>Accept &amp; Donate</Text>
             </Pressable>
             <Text style={styles.commitmentText}>By accepting, you commit to arriving within the specified window.</Text>

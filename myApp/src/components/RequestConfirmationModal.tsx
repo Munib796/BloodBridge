@@ -7,6 +7,7 @@ import { requestDetailStyles as styles } from "../styles/requestDetailStyles";
 import type { RequestMatchDetail } from "../lib/apiTypes";
 import type { AcceptError, Commitment } from "../lib/requestMatches";
 import { formatAbsoluteTime } from "../lib/format";
+import { dialablePakistaniPhone, formatPakistaniPhone } from "../lib/phone";
 
 /**
  * What the sheet needs to describe the request being accepted. Passed as one
@@ -245,6 +246,7 @@ export default function RequestConfirmationModal({
  */
 function CommitmentConfirmed({ match, onDone }: { match: RequestMatchDetail; onDone: () => void }) {
   const unitsLabel = `${match.units_committed} unit${match.units_committed === 1 ? "" : "s"}`;
+  const posterPhone = formatPakistaniPhone(match.poster_phone);
 
   return (
     <View style={styles.successBox}>
@@ -277,12 +279,12 @@ function CommitmentConfirmed({ match, onDone }: { match: RequestMatchDetail; onD
         <View style={styles.coordinatorCopy}>
           <Text style={styles.coordinatorLabel}>Blood coordinator</Text>
           <Text style={styles.coordinatorName}>{match.poster_name ?? "Coordinator"}</Text>
-          <Text style={styles.coordinatorPhone}>{match.poster_phone}</Text>
+          <Text style={styles.coordinatorPhone}>{posterPhone}</Text>
         </View>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`Call ${match.poster_phone}`}
-          onPress={() => Linking.openURL(`tel:${match.poster_phone}`)}
+          accessibilityLabel={`Call ${posterPhone}`}
+          onPress={() => Linking.openURL(`tel:${dialablePakistaniPhone(match.poster_phone)}`)}
           style={styles.callButton}
         >
           <MaterialIcons name="call" size={15} color={colors.surface} />
@@ -291,7 +293,6 @@ function CommitmentConfirmed({ match, onDone }: { match: RequestMatchDetail; onD
       </View>
 
       <Pressable onPress={onDone} style={[styles.modalConfirm, { marginTop: 18 }]}>
-        <MaterialIcons name="arrow-back" size={19} color={colors.surface} />
         <Text style={styles.modalConfirmText}>Back to Requests</Text>
       </Pressable>
     </View>
