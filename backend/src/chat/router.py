@@ -57,7 +57,7 @@ def send_message(
     identity: Identity = Depends(get_current_identity),
     db: Session = Depends(get_db),
 ):
-    return controller.send_message(match_id, identity, data, db)
+    return controller.send_message(match_id, identity, data, db, manager.is_connected)
 
 
 class ConnectionManager:
@@ -69,18 +69,27 @@ class ConnectionManager:
     """
 
     def __init__(self):
-        self.active: dict[str, list[WebSocket]] = {}
+        self.active: dict[str, list[tuple[WebSocket, str]]] = {}
 
-    async def connect(self, match_id: str, websocket: WebSocket) -> None:
+    async def connect(self, match_id: str, websocket: WebSocket, user_id: str) -> None:
         await websocket.accept()
-        self.active.setdefault(match_id, []).append(websocket)
+        self.active.setdefault(match_id, []).append((websocket, user_id))
+
+    def is_connected(self, match_id: str, user_id: str) -> bool:
+        return any(
+            connected_user_id == user_id
+            for _, connected_user_id in self.active.get(match_id, [])
+        )
 
     def disconnect(self, match_id: str, websocket: WebSocket) -> None:
         sockets = self.active.get(match_id)
         if not sockets:
             return
-        if websocket in sockets:
-            sockets.remove(websocket)
+        sockets[:] = [
+            (connected_socket, user_id)
+            for connected_socket, user_id in sockets
+            if connected_socket is not websocket
+        ]
         if not sockets:
             del self.active[match_id]
 
@@ -88,7 +97,7 @@ class ConnectionManager:
         # Iterate a copy and drop sockets that fail: a single dead peer used to
         # raise here and stop delivery to everyone else in the thread.
         dead: list[WebSocket] = []
-        for websocket in list(self.active.get(match_id, [])):
+        for websocket, _ in list(self.active.get(match_id, [])):
             try:
                 await websocket.send_json(payload)
             except Exception:
@@ -123,7 +132,7 @@ async def chat_websocket(websocket: WebSocket, match_id: str, token: str):
         await websocket.close(code=1011)
         return
 
-    await manager.connect(match_id, websocket)
+    await manager.connect(match_id, websocket, str(identity.id))
     recent: deque[float] = deque()
 
     try:
@@ -152,7 +161,13 @@ async def chat_websocket(websocket: WebSocket, match_id: str, token: str):
                 # on until the client disconnects.
                 with session_scope() as db:
                     identity = resolve_identity(token, db)
-                    message = controller.send_message(match_id, identity, payload_in, db)
+                    message = controller.send_message(
+                        match_id,
+                        identity,
+                        payload_in,
+                        db,
+                        manager.is_connected,
+                    )
                     out = dtos.ChatMessageOut.model_validate(message).model_dump(mode="json")
             except HTTPException as exc:
                 await websocket.send_json({"error": exc.detail})

@@ -151,3 +151,8 @@ def expire_overdue(db: Session = Depends(get_db), _admin: Identity = Depends(get
 @router.post("/admin/auto-widen")
 def auto_widen(db: Session = Depends(get_db), _admin: Identity = Depends(get_current_admin)):
     return {"widened_count": controller.auto_widen_stale_requests(db)}
+
+
+@router.post("/admin/notify-overdue-eta")
+def notify_overdue_eta(db: Session = Depends(get_db), _admin: Identity = Depends(get_current_admin)):
+    return {"notified_count": controller.notify_overdue_donor_eta(db)}

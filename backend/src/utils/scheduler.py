@@ -17,7 +17,11 @@ from typing import Callable
 from apscheduler.schedulers.background import BackgroundScheduler
 from sqlalchemy.orm import Session
 
-from src.blood_requests.controller import auto_widen_stale_requests, expire_overdue_requests
+from src.blood_requests.controller import (
+    auto_widen_stale_requests,
+    expire_overdue_requests,
+    notify_overdue_donor_eta,
+)
 from src.utils.database import session_scope
 from src.utils.settings import settings
 
@@ -27,11 +31,12 @@ logger = logging.getLogger(__name__)
 # no-op rather than a second set of jobs racing the first.
 _scheduler: BackgroundScheduler | None = None
 
-# job id -> (human name, sweep). Both sweeps return the number of requests they
-# touched, which is what gets logged.
+# job id -> (human name, sweep). Sweeps return the number of rows they touched,
+# which is what gets logged.
 _SWEEPS: dict[str, tuple[str, Callable[[Session], int]]] = {
     "expire_overdue_requests": ("expire-overdue", expire_overdue_requests),
     "auto_widen_stale_requests": ("auto-widen", auto_widen_stale_requests),
+    "notify_overdue_donor_eta": ("notify-overdue-eta", notify_overdue_donor_eta),
 }
 
 
@@ -62,7 +67,7 @@ def start_scheduler() -> BackgroundScheduler | None:
     if not settings.ENABLE_SCHEDULER:
         logger.info(
             "Sweep scheduler disabled (ENABLE_SCHEDULER=false); "
-            "expire-overdue and auto-widen only run via the admin endpoints"
+            "expire-overdue, auto-widen, and notify-overdue-eta only run via the admin endpoints"
         )
         return None
     if _scheduler is not None:
@@ -92,7 +97,8 @@ def start_scheduler() -> BackgroundScheduler | None:
 
     _scheduler = scheduler
     logger.info(
-        "Sweep scheduler started: expire-overdue and auto-widen every %d minute(s)", interval
+        "Sweep scheduler started: expire-overdue, auto-widen, and notify-overdue-eta every %d minute(s)",
+        interval,
     )
     return scheduler
 

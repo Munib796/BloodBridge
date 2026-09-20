@@ -1,4 +1,5 @@
 import uuid
+from collections.abc import Callable
 
 from fastapi import HTTPException, status
 from sqlalchemy import func as sa_func
@@ -102,7 +103,13 @@ def _recipient_for_chat_message(
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account cannot notify this chat")
 
 
-def send_message(match_id: str, identity: Identity, data: dtos.ChatMessageIn, db: Session) -> ChatMessage:
+def send_message(
+    match_id: str,
+    identity: Identity,
+    data: dtos.ChatMessageIn,
+    db: Session,
+    is_recipient_connected: Callable[[str, str], bool] | None = None,
+) -> ChatMessage:
     thread = get_thread_for_match(match_id, db)
     assert_participant(thread, identity, db)
 
@@ -124,7 +131,7 @@ def send_message(match_id: str, identity: Identity, data: dtos.ChatMessageIn, db
     db.add(message)
 
     recipient_id, recipient_role = _recipient_for_chat_message(thread, identity.entity.id, sender_type)
-    notifications_controller.create_notification(
+    notification = notifications_controller.create_notification(
         recipient_id=recipient_id,
         recipient_role=recipient_role,
         type=NotificationType.NEW_CHAT_MESSAGE,
@@ -137,6 +144,14 @@ def send_message(match_id: str, identity: Identity, data: dtos.ChatMessageIn, db
     )
 
     db.commit()
+
+    recipient_is_connected = (
+        is_recipient_connected is not None
+        and is_recipient_connected(match_id, str(recipient_id))
+    )
+    if not recipient_is_connected:
+        notifications_controller.send_push_notification(notification, db)
+
     db.refresh(message)
     return message
 

@@ -11,6 +11,7 @@ from src.blood_requests.models import BloodRequest
 from src.donors.models import Donor
 from src.hospitals.models import Hospital
 from src.notifications import controller as notifications_controller
+from src.notifications.models import Notification
 from src.request_matches.models import RequestMatch
 from src.utils.auth import Identity, require_roles
 from src.utils.constants import (
@@ -629,6 +630,44 @@ def auto_widen_stale_requests(db: Session) -> int:
         notifications.notify_donors_for_request(blood_request, db, trigger="radius widened")
 
     return len(widened)
+
+
+def notify_overdue_donor_eta(db: Session) -> int:
+    """Nudge requestors once when an accepted donor's ETA has passed."""
+    now = datetime.now(timezone.utc)
+    already_notified = (
+        db.query(Notification.id)
+        .filter(Notification.request_match_id == RequestMatch.id)
+        .filter(Notification.type == NotificationType.DONOR_EAT_PASSED)
+        .exists()
+    )
+    overdue_matches = (
+        db.query(RequestMatch)
+        .filter(RequestMatch.status == MatchStatus.ACCEPTED)
+        .filter(RequestMatch.eta.is_not(None))
+        .filter(RequestMatch.eta < now)
+        .filter(RequestMatch.blood_request.has(BloodRequest.requestor_id.is_not(None)))
+        .filter(~already_notified)
+        .all()
+    )
+
+    for match in overdue_matches:
+        blood_request = match.blood_request
+        notifications_controller.create_notification(
+            recipient_id=blood_request.requestor_id,
+            recipient_role=SenderType.REQUESTOR,
+            type=NotificationType.DONOR_EAT_PASSED,
+            title="Donor running late?",
+            body="Your donor's estimated arrival time has passed. You can reopen this request if needed.",
+            blood_request_id=blood_request.id,
+            request_match_id=match.id,
+            db=db,
+            commit=False,
+        )
+
+    if overdue_matches:
+        db.commit()
+    return len(overdue_matches)
 
 
 # --- Unit accounting ------------------------------------------------------
