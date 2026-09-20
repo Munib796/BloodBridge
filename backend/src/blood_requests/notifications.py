@@ -3,10 +3,6 @@
 The same matching rules as controller.list_nearby_for_donor — blood-type
 compatibility plus the request's current PostGIS radius — run in the other
 direction: one request in, the donors it is reaching out to out.
-
-Nothing is actually sent yet. With no frontend there are no real device tokens
-to send to, so the intent is logged and the send itself is left as a TODO at the
-one call site where it belongs.
 """
 
 import logging
@@ -17,9 +13,10 @@ from sqlalchemy.orm import Session
 
 from src.blood_requests.models import BloodRequest
 from src.donors.models import Donor
+from src.notifications import controller as notifications_controller
 from src.request_matches.models import RequestMatch
 from src.utils.constants import COMPATIBLE_DONORS_FOR_RECIPIENT, OPEN_STATUSES
-from src.utils.enums import MatchStatus
+from src.utils.enums import MatchStatus, NotificationType, SenderType
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +101,21 @@ def notify_donors_for_request(
         blood_request.current_radius_km,
         trigger,
     )
-    # TODO: integrate FCM here once device tokens are collected from the frontend
-    # — send to [donor.device_token for donor in donors], and drop any token the
-    # provider reports as unregistered.
+
+    for donor in donors:
+        notification = notifications_controller.create_notification(
+            recipient_id=donor.id,
+            recipient_role=SenderType.DONOR,
+            type=NotificationType.NEW_NEARBY_REQUEST,
+            title="New blood request nearby",
+            body=(
+                f"A {blood_request.blood_type_needed.value} blood request is nearby and still open."
+            ),
+            blood_request_id=blood_request.id,
+            request_match_id=None,
+            db=db,
+            commit=True,
+        )
+        notifications_controller.send_push_notification(notification, db)
+
     return donors

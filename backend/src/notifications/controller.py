@@ -1,15 +1,22 @@
+import logging
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
+import requests
 from fastapi import HTTPException, status
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
+from src.donors.models import Donor
 from src.notifications import dtos
 from src.notifications.models import Notification
+from src.organizations.models import Organization
+from src.requestors.models import Requestor
 from src.utils.auth import Identity
 from src.utils.enums import NotificationType, SenderType
+
+logger = logging.getLogger(__name__)
 
 
 def list_notifications(
@@ -109,6 +116,78 @@ def create_notification(
         return row
     db.flush()
     return row
+
+
+def _lookup_device_token(recipient_role: SenderType, recipient_id: uuid.UUID, db: Session) -> str | None:
+    if recipient_role == SenderType.REQUESTOR:
+        row = db.query(Requestor).filter(Requestor.id == recipient_id).first()
+        if row is None:
+            return None
+        return row.device_token
+    if recipient_role == SenderType.DONOR:
+        row = db.query(Donor).filter(Donor.id == recipient_id).first()
+        if row is None:
+            return None
+        return row.device_token
+    if recipient_role == SenderType.ORGANIZATION:
+        if not hasattr(Organization, "device_token"):
+            logger.warning(
+                "Skipping Expo push for organization recipient %s because Organization.device_token does not exist",
+                recipient_id,
+            )
+            return None
+        row = db.query(Organization).filter(Organization.id == recipient_id).first()
+        if row is None:
+            return None
+        return row.device_token
+    return None
+
+
+def send_push_notification(notification: Notification, db: Session) -> None:
+    token = _lookup_device_token(notification.recipient_role, notification.recipient_id, db)
+    if not token or not str(token).strip():
+        return
+
+    payload = {
+        "to": token,
+        "title": notification.title,
+        "body": notification.body,
+        "data": {
+            "notification_id": str(notification.id),
+            "blood_request_id": str(notification.blood_request_id) if notification.blood_request_id else None,
+            "request_match_id": str(notification.request_match_id) if notification.request_match_id else None,
+            "type": notification.type.value,
+        },
+    }
+
+    logger.info("Attempting Expo push for notification %s payload=%s", notification.id, payload)
+
+    try:
+        response = requests.post(
+            "https://exp.host/--/api/v2/push/send",
+            json=payload,
+            timeout=5,
+        )
+        response_body = response.json()
+        logger.info(
+            "Expo push response for notification %s status=%s body=%s",
+            notification.id,
+            response.status_code,
+            response_body,
+        )
+        ticket = response_body.get("data", {}) if isinstance(response_body, dict) else {}
+        if 200 <= response.status_code < 300 and ticket.get("status") == "ok":
+            notification.pushed_at = datetime.now(timezone.utc)
+            db.commit()
+            return
+        logger.warning(
+            "Expo push was not accepted for notification %s status=%s body=%s",
+            notification.id,
+            response.status_code,
+            response_body,
+        )
+    except Exception:
+        logger.exception("Expo push failed for notification %s", notification.id)
 
 
 def unread_count(identity: Identity, db: Session) -> int:
