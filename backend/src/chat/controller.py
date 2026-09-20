@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import HTTPException, status
 from sqlalchemy import func as sa_func
 from sqlalchemy import or_, select
@@ -6,9 +8,10 @@ from sqlalchemy.orm import Session, joinedload
 from src.blood_requests.models import BloodRequest
 from src.chat import dtos
 from src.chat.models import ChatMessage, ChatThread
+from src.notifications import controller as notifications_controller
 from src.request_matches.models import RequestMatch
 from src.utils.auth import Identity, require_roles
-from src.utils.enums import SenderType
+from src.utils.enums import NotificationType, SenderType
 
 # Only the two sides of a match can chat, so only they have threads to list.
 # A hospital named on a request is not a participant (see assert_participant).
@@ -61,6 +64,44 @@ def list_messages(match_id: str, identity: Identity, db: Session) -> list[ChatMe
     )
 
 
+def _message_preview(content: str) -> str:
+    preview = content.strip()
+    if len(preview) > MESSAGE_PREVIEW_LENGTH:
+        preview = preview[: MESSAGE_PREVIEW_LENGTH - 1].rstrip() + "…"
+    return preview
+
+
+def _recipient_for_chat_message(
+    thread: ChatThread, sender_id: uuid.UUID | str, sender_type: SenderType
+) -> tuple[uuid.UUID, SenderType]:
+    match = thread.request_match
+    if match is None or match.blood_request is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chat thread not found")
+
+    acceptor_id = match.donor_id or match.organization_id
+    poster_id = match.blood_request.requestor_id or match.blood_request.organization_id
+    sender_key = str(sender_id)
+
+    # The thread has exactly two sides: the acceptor and the poster. We notify
+    # the participant on the other side of the match, regardless of whether they
+    # were a donor or organization.
+    if sender_key == str(acceptor_id) and sender_type in {SenderType.DONOR, SenderType.ORGANIZATION}:
+        if match.blood_request.requestor_id is not None:
+            return match.blood_request.requestor_id, SenderType.REQUESTOR
+        if match.blood_request.organization_id is not None:
+            return match.blood_request.organization_id, SenderType.ORGANIZATION
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Request poster not found")
+
+    if sender_key == str(poster_id) and sender_type in {SenderType.REQUESTOR, SenderType.ORGANIZATION}:
+        if match.donor_id is not None:
+            return match.donor_id, SenderType.DONOR
+        if match.organization_id is not None:
+            return match.organization_id, SenderType.ORGANIZATION
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Match acceptor not found")
+
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="This account cannot notify this chat")
+
+
 def send_message(match_id: str, identity: Identity, data: dtos.ChatMessageIn, db: Session) -> ChatMessage:
     thread = get_thread_for_match(match_id, db)
     assert_participant(thread, identity, db)
@@ -81,6 +122,20 @@ def send_message(match_id: str, identity: Identity, data: dtos.ChatMessageIn, db
         content=data.content,
     )
     db.add(message)
+
+    recipient_id, recipient_role = _recipient_for_chat_message(thread, identity.entity.id, sender_type)
+    notifications_controller.create_notification(
+        recipient_id=recipient_id,
+        recipient_role=recipient_role,
+        type=NotificationType.NEW_CHAT_MESSAGE,
+        title="New message",
+        body=_message_preview(data.content),
+        blood_request_id=thread.request_match.blood_request_id,
+        request_match_id=thread.request_match_id,
+        db=db,
+        commit=False,
+    )
+
     db.commit()
     db.refresh(message)
     return message
