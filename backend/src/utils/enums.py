@@ -47,3 +47,16 @@ class SenderType(str, enum.Enum):
     DONOR = "donor"
     REQUESTOR = "requestor"
     ORGANIZATION = "organization"
+
+
+class NotificationType(str, enum.Enum):
+    NEW_NEARBY_REQUEST = "new_nearby_request"
+    FIRST_DONOR_ACCEPTED = "first_donor_accepted"
+    REQUEST_COMPLETED = "request_completed"
+    REQUESTOR_CANCELLED = "requestor_cancelled"
+    DONOR_CANCELLED = "donor_cancelled"
+    REQUEST_EXPIRED = "request_expired"
+    NEW_CHAT_MESSAGE = "new_chat_message"
+    PARTIAL_ACCEPT = "partial_accept"
+    RADIUS_WIDENED = "radius_widened"
+    DONOR_EAT_PASSED = "donor_eat_passed"

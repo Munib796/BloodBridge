@@ -61,6 +61,17 @@ def update_profile(
     return controller.update_profile(requestor, data, db)
 
 
+@router.patch("/me/device-token", response_model=dtos.RequestorOut)
+def update_device_token(
+    data: dtos.RequestorUpdateDeviceToken,
+    requestor: Requestor = Depends(get_current_requestor),
+    db: Session = Depends(get_db),
+):
+    """Register the device that should receive push notifications about app
+    events. Send `{"device_token": null}` to unregister."""
+    return controller.update_device_token(requestor, data, db)
+
+
 @router.post("/me/profile-pic", response_model=dtos.RequestorOut)
 @limiter.limit("10/minute")
 def upload_profile_pic(

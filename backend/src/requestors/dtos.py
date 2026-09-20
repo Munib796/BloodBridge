@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, EmailStr
 
-from src.utils.validators import Name, Password, Phone
+from src.utils.validators import DeviceToken, Name, Password, Phone
 
 
 class RequestorSignup(BaseModel):
@@ -23,6 +23,13 @@ class RequestorUpdateProfile(BaseModel):
     phone: Phone | None = None
 
 
+class RequestorUpdateDeviceToken(BaseModel):
+    # Required but nullable: an explicit null unregisters the device (logout,
+    # or the OS rotating the token), which is a real operation rather than the
+    # "field omitted" case RequestorUpdateProfile has to ignore.
+    device_token: DeviceToken | None
+
+
 class RequestorOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -31,6 +38,7 @@ class RequestorOut(BaseModel):
     email: EmailStr
     phone: str
     profile_pic_url: str | None
+    device_token: str | None
     is_email_verified: bool
     is_active: bool
     created_at: datetime

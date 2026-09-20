@@ -70,6 +70,19 @@ def update_profile(requestor: Requestor, data: dtos.RequestorUpdateProfile, db: 
     return requestor
 
 
+def update_device_token(requestor: Requestor, data: dtos.RequestorUpdateDeviceToken, db: Session) -> Requestor:
+    """Register (or, with an explicit null, unregister) this requestor's push token.
+
+    Unlike update_profile() a None is honoured rather than skipped: the column
+    is nullable, and clearing it is how the app says "stop notifying this
+    device" on logout.
+    """
+    requestor.device_token = data.device_token
+    db.commit()
+    db.refresh(requestor)
+    return requestor
+
+
 def upload_profile_pic(requestor: Requestor, file: UploadFile, db: Session) -> Requestor:
     requestor.profile_pic_url = upload_image(file, folder="bloodbridge/requestors")
     db.commit()
@@ -92,6 +105,7 @@ def delete_account(requestor: Requestor, db: Session) -> None:
     requestor.phone = "Unavailable"
     requestor.password_hash = "account-deleted"
     requestor.profile_pic_url = None
+    requestor.device_token = None
     db.commit()
 
 

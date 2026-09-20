@@ -10,6 +10,7 @@ from src.blood_requests import dtos, notifications
 from src.blood_requests.models import BloodRequest
 from src.donors.models import Donor
 from src.hospitals.models import Hospital
+from src.notifications import controller as notifications_controller
 from src.request_matches.models import RequestMatch
 from src.utils.auth import Identity, require_roles
 from src.utils.constants import (
@@ -23,7 +24,7 @@ from src.utils.constants import (
     TERMINAL_STATUSES,
     WIDEN_AFTER_MINUTES,
 )
-from src.utils.enums import ApprovalStatus, MatchStatus, RequestStatus
+from src.utils.enums import ApprovalStatus, MatchStatus, NotificationType, RequestStatus, SenderType
 from src.utils.geo import make_point
 
 # Statuses in which unit accounting is still meaningful, i.e. releasing units
@@ -374,12 +375,48 @@ def cancel_request(
             detail=f"Request is already {blood_request.status.value} and cannot be cancelled",
         )
 
-    blood_request.status = RequestStatus.CANCELLED
-    blood_request.cancellation_reason = data.reason
-    cancel_open_matches(blood_request, "Request was cancelled by the poster", db)
-    db.commit()
-    db.refresh(blood_request)
-    return blood_request
+    try:
+        blood_request.status = RequestStatus.CANCELLED
+        blood_request.cancellation_reason = data.reason
+        accepted_matches = (
+            db.query(RequestMatch)
+            .filter(RequestMatch.blood_request_id == blood_request.id)
+            .filter(RequestMatch.status == MatchStatus.ACCEPTED)
+            .all()
+        )
+        cancel_open_matches(blood_request, "Request was cancelled by the poster", db)
+
+        for match in accepted_matches:
+            if match.donor_id is not None:
+                recipient_id = match.donor_id
+                recipient_role = SenderType.DONOR
+            elif match.organization_id is not None:
+                recipient_id = match.organization_id
+                recipient_role = SenderType.ORGANIZATION
+            else:
+                continue
+
+            body = (
+                f"The requestor cancelled this request{f': {data.reason}' if data.reason else ''}."
+            )
+            notifications_controller.create_notification(
+                recipient_id=recipient_id,
+                recipient_role=recipient_role,
+                type=NotificationType.REQUESTOR_CANCELLED,
+                title="Request cancelled",
+                body=body,
+                blood_request_id=blood_request.id,
+                request_match_id=match.id,
+                db=db,
+                commit=False,
+            )
+
+        db.commit()
+        db.refresh(blood_request)
+        return blood_request
+    except Exception:
+        db.rollback()
+        raise
 
 
 def widen_radius(
@@ -500,6 +537,19 @@ def expire_overdue_requests(db: Session) -> int:
         # Otherwise these matches sit at ACCEPTED forever and keep showing up
         # in the donor's "my commitments" list.
         cancel_open_matches(blood_request, "Request expired before it was fulfilled", db)
+
+        if blood_request.requestor_id is not None:
+            notifications_controller.create_notification(
+                recipient_id=blood_request.requestor_id,
+                recipient_role=SenderType.REQUESTOR,
+                type=NotificationType.REQUEST_EXPIRED,
+                title="Request expired",
+                body="Your blood request expired before it was fulfilled.",
+                blood_request_id=blood_request.id,
+                request_match_id=None,
+                db=db,
+                commit=False,
+            )
     db.commit()
     return len(overdue)
 
@@ -539,6 +589,26 @@ def auto_widen_stale_requests(db: Session) -> int:
     # After the commit, not inside the loop: donors are notified against the
     # radius that is actually stored, and one failing notification can't undo
     # the widening of every request in the batch.
+    for blood_request in widened:
+        if blood_request.requestor_id is not None:
+            notifications_controller.create_notification(
+                recipient_id=blood_request.requestor_id,
+                recipient_role=SenderType.REQUESTOR,
+                type=NotificationType.RADIUS_WIDENED,
+                title="Search radius widened",
+                body=(
+                    f"Your request is still open, so we widened the search radius to "
+                    f"{blood_request.current_radius_km} km."
+                ),
+                blood_request_id=blood_request.id,
+                request_match_id=None,
+                db=db,
+                commit=False,
+            )
+
+    if widened:
+        db.commit()
+
     for blood_request in widened:
         notifications.notify_donors_for_request(blood_request, db, trigger="radius widened")
 

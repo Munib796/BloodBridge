@@ -10,11 +10,12 @@ from src.blood_requests import controller as blood_requests_controller
 from src.blood_requests.models import BloodRequest
 from src.chat.models import ChatThread
 from src.donors.models import Donor
+from src.notifications import controller as notifications_controller
 from src.organizations.models import Organization
 from src.request_matches import dtos
 from src.request_matches.models import RequestMatch
 from src.utils.auth import Identity, require_roles
-from src.utils.enums import MatchStatus
+from src.utils.enums import MatchStatus, NotificationType, SenderType
 
 # Either a Donor or an Organization can accept/fulfil a request.
 get_current_acceptor = require_roles("donor", "organization")
@@ -134,13 +135,73 @@ def accept_request(
         eta=data.eta,
     )
 
-    # One transaction for the whole accept: reserving units, recording the
-    # match and opening the chat thread now succeed or fail together. Splitting
-    # them meant a failure after the reservation left units held by no one.
+    # One transaction for the whole accept: reserve units, create the match,
+    # create the chat thread, and create the notification side-effect together.
+    # If any step fails, the whole transaction rolls back and nothing persists.
+    prior_units_secured = blood_request.units_secured
+    prior_open_match = (
+        db.query(RequestMatch.id)
+        .filter(RequestMatch.blood_request_id == blood_request.id)
+        .filter(RequestMatch.status == MatchStatus.ACCEPTED)
+        .first()
+    )
+
     try:
         blood_requests_controller.atomic_reserve_units(blood_request, data.units_committed, db)
         db.add(match)
         db.flush()
+
+        remaining_before = blood_request.units_needed - prior_units_secured
+        remaining_after = blood_request.units_needed - blood_request.units_secured
+        is_first_accept = prior_open_match is None and remaining_after < remaining_before
+        is_request_completed = remaining_before > 0 and remaining_after <= 0
+        is_partial_accept = not is_first_accept and not is_request_completed
+
+        if is_first_accept and blood_request.requestor_id is not None:
+            notifications_controller.create_notification(
+                recipient_id=blood_request.requestor_id,
+                recipient_role=SenderType.REQUESTOR,
+                type=NotificationType.FIRST_DONOR_ACCEPTED,
+                title="A donor is on the way",
+                body=f"A donor has accepted your request for {blood_request.blood_type_needed.value} blood.",
+                blood_request_id=blood_request.id,
+                request_match_id=match.id,
+                db=db,
+                commit=False,
+            )
+
+        if is_request_completed and blood_request.requestor_id is not None:
+            notifications_controller.create_notification(
+                recipient_id=blood_request.requestor_id,
+                recipient_role=SenderType.REQUESTOR,
+                type=NotificationType.REQUEST_COMPLETED,
+                title="All units secured",
+                body=(
+                    f"Your request for {blood_request.blood_type_needed.value} blood has been fully "
+                    "secured."
+                ),
+                blood_request_id=blood_request.id,
+                request_match_id=match.id,
+                db=db,
+                commit=False,
+            )
+
+        if is_partial_accept and blood_request.requestor_id is not None:
+            notifications_controller.create_notification(
+                recipient_id=blood_request.requestor_id,
+                recipient_role=SenderType.REQUESTOR,
+                type=NotificationType.PARTIAL_ACCEPT,
+                title="Another unit secured",
+                body=(
+                    f"{blood_request.units_secured} of {blood_request.units_needed} units secured "
+                    f"for your {blood_request.blood_type_needed.value} request."
+                ),
+                blood_request_id=blood_request.id,
+                request_match_id=match.id,
+                db=db,
+                commit=False,
+            )
+
         db.add(ChatThread(request_match_id=match.id))
         db.commit()
     except IntegrityError:
@@ -183,6 +244,26 @@ def cancel_match(
         match.cancel_reason = data.reason
         # Reopens the parent request for other donors/orgs to respond to.
         blood_requests_controller.release_units(blood_request, match.units_committed, db)
+
+        if blood_request.requestor_id is not None:
+            body = (
+                f"A donor cancelled their accepted match for {blood_request.blood_type_needed.value} blood."
+            )
+            if data.reason:
+                body = f"{body} Reason: {data.reason}"
+
+            notifications_controller.create_notification(
+                recipient_id=blood_request.requestor_id,
+                recipient_role=SenderType.REQUESTOR,
+                type=NotificationType.DONOR_CANCELLED,
+                title="Donor cancelled",
+                body=body,
+                blood_request_id=blood_request.id,
+                request_match_id=match.id,
+                db=db,
+                commit=False,
+            )
+
         db.commit()
     except Exception:
         db.rollback()

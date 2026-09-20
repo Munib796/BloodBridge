@@ -19,6 +19,7 @@ from src.organizations import models as _organizations_models  # noqa: F401,E402
 from src.blood_requests import models as _blood_requests_models  # noqa: F401,E402
 from src.request_matches import models as _request_matches_models  # noqa: F401,E402
 from src.chat import models as _chat_models  # noqa: F401,E402
+from src.notifications import models as _notifications_models  # noqa: F401,E402
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
