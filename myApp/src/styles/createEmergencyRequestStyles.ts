@@ -79,6 +79,7 @@ export const createEmergencyRequestStyles = StyleSheet.create({
     padding: 14,
   },
   label: { color: colors.text, fontSize: 15, lineHeight: 20, fontWeight: "700", marginBottom: 10 },
+  areaField: { marginTop: 14 },
   sectionHeaderRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 },
   sectionHint: { color: "#64748b", fontSize: 12, lineHeight: 16, fontWeight: "600" },
   inputShell: {

@@ -9,6 +9,7 @@ import BrandLogo from "./BrandLogo";
 import { useAuth } from "../context/AuthContext";
 import type { NearbyBloodRequest, UrgencyLevel } from "../lib/apiTypes";
 import { describeFeedError, fetchNearbyRequests, type FeedError } from "../lib/bloodRequests";
+import { fetchUnreadCount } from "../lib/notifications";
 import { formatDeadlineCountdown, formatDistanceKm } from "../lib/format";
 import { donorHomeStyles as styles } from "../styles/donorHomeStyles";
 import { colors } from "../theme/colors";
@@ -146,8 +147,8 @@ function EmptyState() {
 export default function DonorHomeScreen() {
   const router = useRouter();
   const { state } = useAuth();
-  const [view, setView] = useState<"list" | "map">("list");
   const [feed, setFeed] = useState<FeedState>({ status: "loading" });
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Bumping this re-runs the focus effect below — which is all "Try Again" is.
   const [reloadToken, setReloadToken] = useState(0);
@@ -183,6 +184,16 @@ export default function DonorHomeScreen() {
     }, [reloadToken]),
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      void fetchUnreadCount().then((count) => {
+        if (!cancelled) setUnreadCount(count);
+      }).catch(() => undefined);
+      return () => { cancelled = true; };
+    }, []),
+  );
+
   const requestCount = feed.status === "ready" ? feed.requests.length : null;
 
   return (
@@ -191,6 +202,10 @@ export default function DonorHomeScreen() {
       <View style={styles.screen}>
         <View style={styles.header}>
           <View style={styles.brand}><BrandLogo size={36} /><View><Text style={styles.brandName}>BloodBridge</Text><Text style={styles.portalLabel}>Donor Portal</Text></View></View>
+          <Pressable accessibilityLabel="Open notifications" onPress={() => router.push("/notifications" as RelativePathString)} style={styles.notificationButton}>
+            <MaterialIcons name={unreadCount > 0 ? "notifications" : "notifications-none"} size={24} color={unreadCount > 0 ? colors.crimson : colors.mutedText} />
+            {unreadCount > 0 ? <View style={styles.notificationBadge}><Text style={styles.notificationBadgeText}>{unreadCount > 9 ? "9+" : unreadCount}</Text></View> : null}
+          </Pressable>
         </View>
 
         <View style={styles.content}>
@@ -206,12 +221,7 @@ export default function DonorHomeScreen() {
             </View>
             <Pressable onPress={() => router.push("/profile" as RelativePathString)} style={styles.locationButton}><MaterialIcons name="location-on" size={15} color="#475569" /><Text style={styles.locationText}>Update location</Text></Pressable>
           </View>
-          <View style={styles.segmented}>
-            <Pressable onPress={() => setView("list")} style={[styles.segment, view === "list" && styles.segmentActive]}><MaterialIcons name="format-list-bulleted" size={15} color={view === "list" ? colors.text : "#64748b"} /><Text style={[styles.segmentText, view === "list" && styles.segmentTextActive]}>List View</Text></Pressable>
-            <Pressable onPress={() => setView("map")} style={[styles.segment, view === "map" && styles.segmentActive]}><MaterialIcons name="map" size={15} color={view === "map" ? colors.text : "#64748b"} /><Text style={[styles.segmentText, view === "map" && styles.segmentTextActive]}>Map View</Text></Pressable>
-          </View>
-          {view === "map" ? <View style={styles.mapPlaceholder}><MaterialIcons name="map" size={36} color="#cbd5e1" /><Text style={styles.mapText}>Map view coming soon</Text></View> : (
-            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
               <View style={styles.feedHeader}>
                 <Text style={styles.feedTitle}>Active Requests Nearby</Text>
                 {/* The backend orders this by distance, not urgency — the old
@@ -246,8 +256,7 @@ export default function DonorHomeScreen() {
                   ))}
                 </View>
               ) : null}
-            </ScrollView>
-          )}
+          </ScrollView>
         </View>
         <View style={styles.bottomBar}>
           <Pressable style={styles.tab}><MaterialIcons name="water-drop" size={23} color={colors.crimson} /><Text style={[styles.tabLabel, styles.activeTabLabel]}>Requests</Text></Pressable>

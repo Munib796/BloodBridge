@@ -4,7 +4,6 @@ import { useFocusEffect, useRouter, type RelativePathString } from "expo-router"
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Animated,
   Linking,
   Pressable,
@@ -18,6 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import BrandLogo from "./BrandLogo";
 import CancelCommitmentModal, { type CommitmentContext } from "./CancelCommitmentModal";
+import CompleteDonationModal from "./CompleteDonationModal";
 import { colors } from "../theme/colors";
 import { donorHistoryStyles as styles } from "../styles/donorHistoryStyles";
 import type { MatchStatus, RequestMatchDetail, RequestStatus, UrgencyLevel } from "../lib/apiTypes";
@@ -497,9 +497,9 @@ export default function DonorHistoryScreen() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
 
-  // Completion uses a native confirm instead of a sheet, so its failure has
-  // nowhere of its own to render — it is pinned to the card that raised it.
+  // Completion is confirmed in a themed sheet before the irreversible write.
   const [completingId, setCompletingId] = useState<string | null>(null);
+  const [pendingComplete, setPendingComplete] = useState<RequestMatchDetail | null>(null);
   const [completeError, setCompleteError] = useState<{ matchId: string; message: string } | null>(
     null,
   );
@@ -697,14 +697,7 @@ export default function DonorHistoryScreen() {
    * would be more ceremony than the moment deserves.
    */
   function confirmComplete(match: RequestMatchDetail) {
-    Alert.alert(
-      "Confirm Donation Completed",
-      `Mark your ${unitsLabel(match.units_committed)} donation for ${match.blood_request.patient_name} as completed? Only confirm once you have donated.`,
-      [
-        { text: "Not Yet", style: "cancel" },
-        { text: "Confirm", onPress: () => void handleComplete(match) },
-      ],
-    );
+    setPendingComplete(match);
   }
 
   return (
@@ -869,6 +862,19 @@ export default function DonorHistoryScreen() {
           onCancelCommitment={(reason) => void handleCancelCommitment(reason)}
           onClose={handleCloseCancel}
           visible
+        />
+      ) : null}
+      {pendingComplete ? (
+        <CompleteDonationModal
+          visible
+          unitsLabel={unitsLabel(pendingComplete.units_committed)}
+          patientName={pendingComplete.blood_request.patient_name}
+          onClose={() => setPendingComplete(null)}
+          onConfirm={() => {
+            const match = pendingComplete;
+            setPendingComplete(null);
+            void handleComplete(match);
+          }}
         />
       ) : null}
     </SafeAreaView>

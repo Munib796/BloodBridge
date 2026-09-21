@@ -8,6 +8,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BrandLogo from "./BrandLogo";
 import type { BloodRequest, UrgencyLevel } from "../lib/apiTypes";
 import { fetchMyRequests } from "../lib/bloodRequests";
+import { fetchUnreadCount } from "../lib/notifications";
 import { describeApiFailure, type ApiFailure } from "../lib/errors";
 import { formatAbsoluteTime, formatPostedAgo } from "../lib/format";
 import { REQUEST_STATUS_LABELS, isInFlight } from "../lib/requestStatus";
@@ -216,6 +217,7 @@ function NoRequests() {
 export default function RequestorHomeScreen() {
   const router = useRouter();
   const [broadcasts, setBroadcasts] = useState<BroadcastState>({ status: "loading" });
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Bumping this re-runs the focus effect below — which is all "Try Again" is.
   const [reloadToken, setReloadToken] = useState(0);
@@ -259,6 +261,16 @@ export default function RequestorHomeScreen() {
     }, [reloadToken]),
   );
 
+  useFocusEffect(
+    useCallback(() => {
+      let cancelled = false;
+      void fetchUnreadCount().then((count) => {
+        if (!cancelled) setUnreadCount(count);
+      }).catch(() => undefined);
+      return () => { cancelled = true; };
+    }, []),
+  );
+
   const requests = broadcasts.status === "ready" ? broadcasts.requests : [];
 
   return (
@@ -271,6 +283,10 @@ export default function RequestorHomeScreen() {
             <Text style={styles.brand}>BloodBridge</Text>
             <Text style={styles.portal}>Requestor Portal</Text>
           </View>
+          <Pressable accessibilityLabel="Open notifications" onPress={() => router.push("/notifications" as RelativePathString)} style={styles.notificationButton}>
+            <MaterialIcons name={unreadCount > 0 ? "notifications" : "notifications-none"} size={24} color={unreadCount > 0 ? colors.crimson : colors.mutedText} />
+            {unreadCount > 0 ? <View style={styles.notificationBadge}><Text style={styles.notificationBadgeText}>{unreadCount > 9 ? "9+" : unreadCount}</Text></View> : null}
+          </Pressable>
         </View>
         <View style={styles.content}>
           <ScrollView

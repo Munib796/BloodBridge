@@ -49,6 +49,7 @@ export type RequestorProfile = {
   email: string;
   phone: string;
   profile_pic_url: string | null;
+  device_token: string | null;
   is_email_verified: boolean;
   is_active: boolean;
   created_at: string;
@@ -178,6 +179,35 @@ export type RequestMatchDetail = {
 /** SenderType — src/utils/enums.py. Whichever side of the match sent a
  *  message; matches the three roles allowed into a chat thread at all. */
 export type ChatSenderType = "donor" | "requestor" | "organization";
+
+/** NotificationType — src/utils/enums.py. */
+export type NotificationType =
+  | "new_nearby_request"
+  | "first_donor_accepted"
+  | "request_completed"
+  | "requestor_cancelled"
+  | "donor_cancelled"
+  | "request_expired"
+  | "new_chat_message"
+  | "partial_accept"
+  | "radius_widened"
+  | "donor_eat_passed";
+
+/** NotificationOut — src/notifications/dtos.py. */
+export type Notification = {
+  id: string;
+  recipient_id: string;
+  recipient_role: ChatSenderType;
+  type: NotificationType;
+  title: string;
+  body: string;
+  blood_request_id: string | null;
+  request_match_id: string | null;
+  payload: Record<string, unknown> | null;
+  pushed_at: string | null;
+  read_at: string | null;
+  created_at: string;
+};
 
 /**
  * ChatMessageOut — src/chat/dtos.py.

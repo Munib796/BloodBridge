@@ -405,19 +405,21 @@ export default function CreateEmergencyRequestScreen() {
                 </Pressable>
               ) : null}
 
-              <Text style={styles.label}>Area / Neighborhood Label</Text>
-              <View style={[styles.inputShell, fieldErrors.area_label ? styles.inputShellError : null]}>
-                <TextInput
-                  accessibilityLabel="Area or neighborhood label"
-                  autoCapitalize="words"
-                  maxLength={MAX_NAME_LENGTH}
-                  onChangeText={(value) => { setAreaLabel(value); clearFieldError("area_label"); }}
-                  placeholder="e.g. Johar Town, Lahore"
-                  placeholderTextColor="#94a3b8"
-                  style={styles.input}
-                  value={areaLabel}
-                />
-                <MaterialIcons name="location-city" size={21} color="#94a3b8" />
+              <View style={styles.areaField}>
+                <Text style={styles.label}>Area / Neighborhood Label</Text>
+                <View style={[styles.inputShell, fieldErrors.area_label ? styles.inputShellError : null]}>
+                  <TextInput
+                    accessibilityLabel="Area or neighborhood label"
+                    autoCapitalize="words"
+                    maxLength={MAX_NAME_LENGTH}
+                    onChangeText={(value) => { setAreaLabel(value); clearFieldError("area_label"); }}
+                    placeholder="e.g. Johar Town, Lahore"
+                    placeholderTextColor="#94a3b8"
+                    style={styles.input}
+                    value={areaLabel}
+                  />
+                  <MaterialIcons name="location-city" size={21} color="#94a3b8" />
+                </View>
               </View>
               {fieldErrors.area_label ? (
                 <Text accessibilityRole="alert" style={styles.fieldError}>{fieldErrors.area_label}</Text>

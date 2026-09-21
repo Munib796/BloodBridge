@@ -32,6 +32,7 @@ import {
   saveIdentity,
   saveToken,
 } from "../lib/tokenStorage";
+import { registerPushToken } from "../lib/notifications";
 
 // The profile DTOs moved to src/lib/apiTypes.ts once the donor home feed needed
 // the same shapes; they are re-exported here so existing imports keep working.
@@ -278,6 +279,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const session = toSession(role, profile);
         await persist(access_token, session);
         await adopt(access_token, session);
+        void registerPushToken(role);
       } catch (error) {
         // Otherwise a half-finished login leaves a token attached to a
         // signed-out client, and the next request goes out authenticated.

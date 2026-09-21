@@ -12,8 +12,8 @@ import type { BloodRequest, RequestMatchDetail, UrgencyLevel } from "../lib/apiT
 import { describeRequestError, fetchRequest, type RequestDetailError } from "../lib/bloodRequests";
 import { availabilityErrorMessage, setDonorAvailability } from "../lib/donors";
 import { formatAbsoluteTime, formatDeadlineCountdown, formatDistanceKm, formatPostedAgo } from "../lib/format";
-import { acceptRequest, describeAcceptError, type AcceptError, type Commitment } from "../lib/requestMatches";
-import { REQUEST_STATUS_LABELS as STATUS_LABELS } from "../lib/requestStatus";
+import { acceptRequest, describeAcceptError, fetchMyMatches, type AcceptError, type Commitment } from "../lib/requestMatches";
+import { isBroadcasting, REQUEST_STATUS_LABELS as STATUS_LABELS } from "../lib/requestStatus";
 import { colors } from "../theme/colors";
 import { requestDetailStyles as styles } from "../styles/requestDetailStyles";
 
@@ -163,6 +163,7 @@ export default function RequestDetailScreen() {
   const shownDistance = distanceKm !== null && Number.isFinite(distanceKm) ? distanceKm : null;
 
   const [detail, setDetail] = useState<DetailState>({ status: "loading" });
+  const [existingMatch, setExistingMatch] = useState<RequestMatchDetail | null>(null);
   // Bumping this re-runs the fetch — all "Try Again" is.
   const [reloadToken, setReloadToken] = useState(0);
 
@@ -194,8 +195,11 @@ export default function RequestDetailScreen() {
     async function load() {
       setDetail({ status: "loading" });
       try {
-        const request = await fetchRequest(requestId!);
-        if (!cancelled) setDetail({ status: "ready", request });
+        const [request, matches] = await Promise.all([fetchRequest(requestId!), fetchMyMatches()]);
+        if (!cancelled) {
+          setDetail({ status: "ready", request });
+          setExistingMatch(matches.find((match) => match.blood_request_id === request.id) ?? null);
+        }
       } catch (error) {
         if (!cancelled) setDetail({ status: "error", error: describeRequestError(error) });
       }
@@ -210,6 +214,8 @@ export default function RequestDetailScreen() {
 
   async function handleAccept(commitment: Commitment) {
     if (!requestId || isAccepting) return;
+    const currentRequest = detail.status === "ready" ? detail.request : null;
+    if (!currentRequest || !isBroadcasting(currentRequest.status) || existingMatch) return;
 
     setIsAccepting(true);
     setAcceptError(null);
@@ -262,6 +268,15 @@ export default function RequestDetailScreen() {
 
   const request = detail.status === "ready" ? detail.request : null;
   const appearance = request ? URGENCY_APPEARANCE[request.urgency_level] : null;
+  const canAccept = Boolean(request && isBroadcasting(request.status) && !existingMatch);
+
+  function closedRequestMessage(status: NonNullable<typeof request>["status"]): string {
+    if (status === "fully_matched") return "This request has been fully matched.";
+    if (status === "expired") return "This request has expired.";
+    if (status === "cancelled") return "This request was cancelled.";
+    if (status === "fulfilled") return "This request has been fulfilled.";
+    return "This request is not currently accepting donations.";
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -454,13 +469,41 @@ export default function RequestDetailScreen() {
                   </Text>
                 </View>
               </View>
+
+              {!canAccept ? (
+                <View style={styles.statusBanner}>
+                  <View style={styles.statusBannerIcon}>
+                    <MaterialIcons
+                      name={existingMatch ? "check-circle" : "info-outline"}
+                      size={18}
+                      color={existingMatch ? colors.emeraldText : colors.mutedText}
+                    />
+                  </View>
+                  <View style={styles.statusBannerCopy}>
+                    <Text style={styles.statusBannerTitle}>
+                      {existingMatch ? "You've already committed to this request" : closedRequestMessage(request.status)}
+                    </Text>
+                    <Text style={styles.statusBannerText}>
+                      {existingMatch
+                        ? "You can manage this commitment from your donation history."
+                        : "No new donation can be accepted for this request."}
+                    </Text>
+                    {existingMatch ? (
+                      <Pressable onPress={() => router.push("/history" as RelativePathString)} style={styles.statusBannerAction}>
+                        <Text style={styles.statusBannerActionText}>Open Donation History</Text>
+                        <MaterialIcons name="chevron-right" size={16} color={colors.crimson} />
+                      </Pressable>
+                    ) : null}
+                  </View>
+                </View>
+              ) : null}
             </>
           ) : null}
         </ScrollView>
 
         {/* Withheld until the request has loaded: accepting something the
             screen couldn't read is not an offer worth making. */}
-        {request && appearance ? (
+        {request && appearance && canAccept ? (
           <View style={styles.bottomAction}>
             <Pressable onPress={() => setModalVisible(true)} style={styles.acceptButton}>
               <BrandLogo size={22} />
@@ -485,7 +528,7 @@ export default function RequestDetailScreen() {
           </Pressable>
         </View>
 
-        {request && appearance ? (
+        {request && appearance && canAccept ? (
           <RequestConfirmationModal
             visible={modalVisible}
             onClose={handleCloseModal}

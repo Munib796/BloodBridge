@@ -14,3 +14,4 @@ slowapi
 python-multipart
 websockets
 apscheduler
+requests
