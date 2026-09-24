@@ -27,29 +27,31 @@ The user experience is built around role-aware navigation, secure session storag
 
 ## App structure
 
+```text
 myApp/
 ├── app.config.js
 ├── package.json
 ├── README.md
 ├── assets/
-├── src/
-│   ├── app/
-│   │   ├── _layout.tsx
-│   │   ├── index.tsx
-│   │   ├── donor-signup.tsx
-│   │   ├── requestor-signup.tsx
-│   │   ├── home.tsx
-│   │   ├── requestor-home.tsx
-│   │   ├── history.tsx
-│   │   ├── requestor-history.tsx
-│   │   ├── profile.tsx
-│   │   └── requestor/
-│   ├── components/
-│   ├── context/
-│   ├── lib/
-│   ├── styles/
-│   ├── theme/
-│   └── utils/
+└── src/
+    ├── app/
+    │   ├── _layout.tsx
+    │   ├── index.tsx
+    │   ├── donor-signup.tsx
+    │   ├── requestor-signup.tsx
+    │   ├── home.tsx
+    │   ├── requestor-home.tsx
+    │   ├── history.tsx
+    │   ├── requestor-history.tsx
+    │   ├── profile.tsx
+    │   └── requestor/
+    ├── components/
+    ├── context/
+    ├── lib/
+    ├── styles/
+    ├── theme/
+    └── utils/
+```
 
 ## Core app behavior
 
