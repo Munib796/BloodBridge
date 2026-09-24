@@ -1,10 +1,8 @@
 /**
  * "I never got the verification email" — resending it.
  *
- * Only donors and requestors verify by email. Hospitals and organizations are
- * gated on admin approval instead and have no resend endpoint at all, which is
- * why the role here is its own narrow type rather than the app-wide UserRole:
- * it makes the unsupported case unrepresentable rather than a 404 at runtime.
+ * The role is its own narrow type so the endpoint map only accepts roles with
+ * a supported resend-verification endpoint.
  */
 
 import { ApiError, api } from "./apiClient";

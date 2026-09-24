@@ -32,6 +32,4 @@ export const styles = StyleSheet.create({
   footer: { alignItems: "center", marginTop: 18, gap: 8 },
   loginPrompt: { color: "#777480", fontSize: 11 },
   login: { color: "#9e001f", fontWeight: "700" },
-  hospitalLink: { minHeight: 34, paddingHorizontal: 12, borderRadius: 8, backgroundColor: "#f2f3ff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6 },
-  hospitalText: { color: "#5c5b68", fontSize: 11, lineHeight: 14, fontWeight: "700" },
 });

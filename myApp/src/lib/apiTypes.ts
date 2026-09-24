@@ -55,21 +55,8 @@ export type RequestorProfile = {
   created_at: string;
 };
 
-/** HospitalOut / OrganizationOut — the same fields; only the role differs. */
-export type FacilityProfile = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  logo_url: string | null;
-  approval_status: "pending" | "approved" | "rejected";
-  is_email_verified: boolean;
-  created_at: string;
-};
-
-/** Whatever `/{role}/me` returns, for the role that was asked about. */
-export type AuthProfile = DonorProfile | RequestorProfile | FacilityProfile;
+/** Whatever `/{role}/me` returns for a mobile-app login role. */
+export type AuthProfile = DonorProfile | RequestorProfile;
 
 /** MatchStatus — src/utils/enums.py. */
 export type MatchStatus = "accepted" | "completed" | "cancelled";

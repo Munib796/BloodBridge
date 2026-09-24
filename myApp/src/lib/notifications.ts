@@ -6,19 +6,15 @@ import type { UserRole } from "../context/AuthContext";
 
 const EXPO_PROJECT_ID = "4931de7e-e00a-45c6-b91f-53498123e2dc";
 
-type PushCapableRole = Extract<UserRole, "donor" | "requestor">;
-
 type DeviceTokenProfile = DonorProfile | RequestorProfile;
 
-const DEVICE_TOKEN_PATHS: Record<PushCapableRole, string> = {
+const DEVICE_TOKEN_PATHS: Record<UserRole, string> = {
   donor: "/donors/me/device-token",
   requestor: "/requestors/me/device-token",
 };
 
 /** Register the current device for push notifications without blocking auth. */
 export async function registerPushToken(role: UserRole): Promise<void> {
-  if (role !== "donor" && role !== "requestor") return;
-
   try {
     const permission = await Notifications.requestPermissionsAsync();
     if (!permission.granted) {

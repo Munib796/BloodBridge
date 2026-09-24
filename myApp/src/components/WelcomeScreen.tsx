@@ -3,9 +3,9 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter, type RelativePathString } from "expo-router";
-import { useEffect, useState } from "react";
-import { Animated, Pressable, Text, View } from "react-native";
+import { useFocusEffect, useRouter, type RelativePathString } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import { Animated, BackHandler, Platform, Pressable, Text, View } from "react-native";
 
 import { styles } from "../styles/welcomeStyles";
 import BrandLogo from "./BrandLogo";
@@ -109,16 +109,22 @@ function WelcomeFooter() {
       <Pressable onPress={() => router.push("/login")}>
         <Text style={styles.loginPrompt}>Already registered? <Text style={styles.login}>Log in</Text></Text>
       </Pressable>
-      <Pressable style={styles.hospitalLink}>
-        <MaterialIcons name="domain" size={16} color="#5c5b68" />
-        <Text style={styles.hospitalText}>Hospital or Organization Login</Text>
-        <MaterialIcons name="north-east" size={14} color="#5c5b68" />
-      </Pressable>
     </View>
   );
 }
 
 export default function WelcomeScreen() {
+  useFocusEffect(useCallback(() => {
+    if (Platform.OS !== "android") return undefined;
+
+    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
+      BackHandler.exitApp();
+      return true;
+    });
+
+    return () => subscription.remove();
+  }, []));
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar style="dark" />

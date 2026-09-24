@@ -1,9 +1,64 @@
 import { Stack } from "expo-router";
 import * as Notifications from "expo-notifications";
-import { useEffect } from "react";
-import { Platform } from "react-native";
+import * as SplashScreen from "expo-splash-screen";
+import { useCallback, useEffect, useState } from "react";
+import { Platform, StyleSheet, View } from "react-native";
 
-import { AuthProvider } from "../context/AuthContext";
+import AppSplashScreen from "../components/AppSplashScreen";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+
+const SPLASH_MINIMUM_DURATION_MS = 4500;
+const splashStartedAt = Date.now();
+
+void SplashScreen.preventAutoHideAsync().catch((error) => {
+  console.warn("[Splash] Could not keep the splash screen visible.", error);
+});
+
+function SplashGate() {
+  const { state } = useAuth();
+  const [nativeSplashDismissed, setNativeSplashDismissed] = useState(false);
+  const [appSplashVisible, setAppSplashVisible] = useState(true);
+
+  // The native OS splash only needs to stay up until this JS tree has
+  // something to paint — our own AppSplashScreen is that thing, and it's
+  // mounted below on the very first render, so we hide the native one right
+  // away rather than holding it for the full auth/2s wait.
+  useEffect(() => {
+    void SplashScreen.hideAsync()
+      .catch((error) => {
+        console.warn("[Splash] Could not hide the native splash screen.", error);
+      })
+      .finally(() => setNativeSplashDismissed(true));
+  }, []);
+
+  const authReady = state.status !== "loading";
+  const [minimumDurationElapsed, setMinimumDurationElapsed] = useState(false);
+
+  useEffect(() => {
+    const remaining = Math.max(0, SPLASH_MINIMUM_DURATION_MS - (Date.now() - splashStartedAt));
+    const timeout = setTimeout(() => setMinimumDurationElapsed(true), remaining);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handleAppSplashHidden = useCallback(() => setAppSplashVisible(false), []);
+
+  // The branded splash is ready to fade out once auth has hydrated, the
+  // minimum hold time has passed, and the native splash is out of the way.
+  const readyToDismiss = authReady && minimumDurationElapsed && nativeSplashDismissed;
+
+  return (
+    <View style={styles.fill}>
+      <Stack screenOptions={{ headerShown: false }} />
+      {appSplashVisible ? (
+        <AppSplashScreen ready={readyToDismiss} onHidden={handleAppSplashHidden} />
+      ) : null}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+});
 
 export default function RootLayout() {
   useEffect(() => {
@@ -22,7 +77,7 @@ export default function RootLayout() {
   // been read, which is a single keychain lookup rather than a network call.
   return (
     <AuthProvider>
-      <Stack screenOptions={{ headerShown: false }} />
+      <SplashGate />
     </AuthProvider>
   );
 }

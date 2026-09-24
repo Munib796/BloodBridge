@@ -15,11 +15,8 @@ import type { DonorProfile, RequestorProfile } from "./apiTypes";
 /**
  * The two roles with a self-service profile.
  *
- * Hospitals and organizations are deliberately absent: they are gated on admin
- * approval, and neither has a PATCH /me nor an email password reset. Making
- * this its own narrow type rather than reusing the app-wide UserRole means the
- * unsupported case is unrepresentable instead of a 404 at runtime — the same
- * reasoning as ResendableRole in verification.ts.
+ * This stays separate from the app-wide UserRole so each endpoint map only
+ * accepts roles supported by the corresponding profile operation.
  */
 export type EditableRole = "donor" | "requestor";
 

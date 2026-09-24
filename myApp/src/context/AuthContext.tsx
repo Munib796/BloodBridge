@@ -22,7 +22,6 @@ import { ApiError, api, setAuthToken, setUnauthorizedHandler } from "../lib/apiC
 import type {
   AuthProfile,
   DonorProfile,
-  FacilityProfile,
   RequestorProfile,
 } from "../lib/apiTypes";
 import {
@@ -36,21 +35,19 @@ import { registerPushToken } from "../lib/notifications";
 
 // The profile DTOs moved to src/lib/apiTypes.ts once the donor home feed needed
 // the same shapes; they are re-exported here so existing imports keep working.
-export type { AuthProfile, DonorProfile, FacilityProfile, RequestorProfile };
+export type { AuthProfile, DonorProfile, RequestorProfile };
 
 // --- Roles and profiles ----------------------------------------------------
 /**
- * The four roles that can log in. `admin` is deliberately absent: it signs in
+ * The two roles that can log in. `admin` is deliberately absent: it signs in
  * through a separate hardcoded-admin endpoint and is not a mobile-app user.
  */
-export type UserRole = "donor" | "requestor" | "hospital" | "organization";
+export type UserRole = "donor" | "requestor";
 
 /** Backend path segment per role — note they are plural in the URL. */
 const ROLE_PATHS: Record<UserRole, string> = {
   donor: "donors",
   requestor: "requestors",
-  hospital: "hospitals",
-  organization: "organizations",
 };
 
 // These mirror the backend's *Out DTOs — see src/lib/apiTypes.ts. The role and
@@ -64,9 +61,7 @@ const ROLE_PATHS: Record<UserRole, string> = {
  */
 export type AuthSession =
   | { role: "donor"; profile: DonorProfile }
-  | { role: "requestor"; profile: RequestorProfile }
-  | { role: "hospital"; profile: FacilityProfile }
-  | { role: "organization"; profile: FacilityProfile };
+  | { role: "requestor"; profile: RequestorProfile };
 
 export type AuthState =
   | { status: "loading" }
@@ -74,6 +69,10 @@ export type AuthState =
   | ({ status: "signedIn"; token: string } & AuthSession);
 
 type TokenResponse = { access_token: string; token_type: string };
+
+function isSupportedRole(role: unknown): role is UserRole {
+  return role === "donor" || role === "requestor";
+}
 
 // --- Session helpers -------------------------------------------------------
 
@@ -203,6 +202,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (!token || !session) {
         setAuthToken(null);
+        applyState({ status: "signedOut" });
+        return;
+      }
+
+      if (!isSupportedRole(session.role)) {
+        setAuthToken(null);
+        await clearSession();
         applyState({ status: "signedOut" });
         return;
       }
